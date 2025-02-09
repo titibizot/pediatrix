@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Pediatrix - Mode Libre</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #e8f4ff; /* Fond original bleu pastel */
+            font-family: 'Nunito', sans-serif;
+        }
+        .container {
+            margin-top: 30px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        header {
+            margin-bottom: 20px;
+        }
+        .logo {
+            height: 60px;
+        }
+        h1, h5 {
+            color: #0066cc;
+        }
+        #timer {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Navigation -->
+    <header class="d-flex justify-content-between align-items-center">
+        <div>
+            <a href="{{ url_for('home') }}" class="btn btn-primary">Accueil</a>
+        </div>
+        <div>
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Pediatrix" class="logo">
+        </div>
+        <div>
+            <a href="{{ url_for('challenge_mode') }}" class="btn btn-secondary">Mode Challenge</a>
+        </div>
+    </header>
+    <h1 class="text-center">Mode Libre</h1>
+    
+    <div class="card mx-auto mt-3" style="max-width: 600px;">
+        <div class="card-body">
+            <h5 class="card-title">Règles du jeu</h5>
+            <p class="card-text">
+                Devinez la maladie cible en proposant des mots-clés.<br>
+                La réponse comporte <strong>{{ word_count }}</strong> mot{% if word_count > 1 %}s{% endif %}.<br><br>
+                <strong>Code couleur :</strong>
+                <ul class="text-left">
+                    <li><strong>Vert :</strong> Proposition exacte du nom – bonne réponse.</li>
+                    <li><strong>Light-green :</strong> Proposition exacte d'un mot-clé – vous êtes très proche.</li>
+                    <li><strong>Jaune :</strong> Proposition sémantiquement proche des mots-clés.</li>
+                    <li><strong>Rouge :</strong> Proposition peu pertinente.</li>
+                </ul>
+            </p>
+        </div>
+    </div>
+    
+    {% if hints %}
+    <div class="card mx-auto mt-3" style="max-width: 600px;">
+        <div class="card-body">
+            <h5 class="card-title">Indices</h5>
+            <p class="card-text">Mots-clés : {{ hints[0] }}, {{ hints[1] }}</p>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center mt-3">
+        <a href="{{ url_for('libre_mode', show_hint=1) }}" class="btn btn-info">Voir Indice</a>
+    </div>
+    {% endif %}
+    
+    <div class="text-center mb-3 mt-3">
+        <a href="{{ url_for('reveal_libre') }}" class="btn btn-danger ml-2">Réponse</a>
+        <a href="{{ url_for('reset_libre') }}" class="btn btn-secondary ml-2">Redémarrer</a>
+    </div>
+    
+    {% if timer_active and time_left is not none %}
+    <div class="text-center mb-3">
+        <p>Temps restant : <span id="timer">{{ time_left }}</span> secondes</p>
+    </div>
+    {% endif %}
+    
+    <form method="post" id="guessForm" novalidate>
+        <div class="form-group">
+            <label for="guess">Entrez vos mots-clés ou le nom de la maladie :</label>
+            <input type="text" id="guess" name="guess" class="form-control" required placeholder="Ex : odynophagie, dysphagie...">
+            <div class="invalid-feedback">Veuillez saisir une proposition.</div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="submitBtn">Envoyer</button>
+    </form>
+    
+    {% if message %}
+    <div class="alert alert-info mt-3" role="alert">
+        {{ message|safe }}
+    </div>
+    {% endif %}
+    
+    {% if attempts %}
+    <h2 class="mt-4">Historique des tentatives</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Proposition</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attempt in attempts %}
+                {% if attempt.category == "green" %}
+                    {% set color_class = "table-success" %}
+                {% elif attempt.category == "light-green" %}
+                    {% set color_class = "table-info" %}
+                {% elif attempt.category == "yellow" %}
+                    {% set color_class = "table-warning" %}
+                {% else %}
+                    {% set color_class = "table-danger" %}
+                {% endif %}
+            <tr class="{{ color_class }}">
+                <td>{{ attempt.guess }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+<script>
+    {% if timer_active and time_left is not none %}
+    // Minuteur en JavaScript
+    var timeLeft = {{ time_left }};
+    var timerElem = document.getElementById("timer");
+    var submitBtn = document.getElementById("submitBtn");
+    var countdown = setInterval(function() {
+        if (timeLeft <= 0) {
+            clearInterval(countdown);
+            timerElem.innerHTML = "0";
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = "Temps écoulé";
+        } else {
+            timerElem.innerHTML = timeLeft;
+        }
+        timeLeft -= 1;
+    }, 1000);
+    {% endif %}
+    
+    // Validation du formulaire
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var form = document.getElementById('guessForm');
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        }, false);
+    })();
+</script>
+</body>
+</html>

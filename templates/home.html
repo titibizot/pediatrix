@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Pediatrix - Accueil</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Google Fonts: Nunito -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #e8f4ff; /* Fond original en bleu pastel */
+            font-family: 'Nunito', sans-serif;
+        }
+        .container {
+            margin-top: 100px;
+        }
+        header {
+            margin-bottom: 30px;
+        }
+        .logo {
+            height: 80px;
+        }
+        h1, h5 {
+            color: #0066cc;
+        }
+    </style>
+</head>
+<body>
+<div class="container text-center">
+    <!-- En-tête avec logo -->
+    <header>
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Pediatrix" class="logo">
+        <h1>Pediatrix</h1>
+    </header>
+    <div class="card mx-auto mt-4" style="max-width: 600px;">
+        <div class="card-body">
+            <h5 class="card-title">Règles du jeu</h5>
+            <p class="card-text">
+                L'objectif est de deviner la maladie cible en proposant des mots-clés.<br><br>
+                <strong>Code couleur :</strong>
+                <ul class="text-left">
+                    <li><strong>Vert :</strong> Proposition exacte du nom – bonne réponse.</li>
+                    <li><strong>Light-green :</strong> Proposition exacte d'un mot-clé – vous êtes très proche.</li>
+                    <li><strong>Jaune :</strong> Proposition sémantiquement proche des mots-clés.</li>
+                    <li><strong>Rouge :</strong> Proposition peu pertinente.</li>
+                </ul>
+                <br>
+                En mode <em>Challenge</em>, un mot est fixé par jour.<br>
+                En mode <em>Libre</em>, vous pouvez jouer sans limite.
+            </p>
+        </div>
+    </div>
+    <p class="mt-4">Choisissez votre mode de jeu :</p>
+    <a href="{{ url_for('challenge_mode') }}" class="btn btn-primary btn-lg">Mode Challenge</a>
+    <a href="{{ url_for('libre_mode') }}" class="btn btn-success btn-lg ml-3">Mode Libre</a>
+    <br><br>
+    <a href="{{ url_for('settings') }}" class="btn btn-info">Paramètres</a>
+    <a href="{{ url_for('stats_page') }}" class="btn btn-warning">Mes Statistiques</a>
+    <br><br>
+    <a href="{{ url_for('admin') }}" class="btn btn-dark">Administration</a>
+</div>
+</body>
+</html>

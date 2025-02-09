@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Paramètres - Pediatrix</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #e8f4ff; /* Fond original */
+            font-family: 'Nunito', sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        h1 {
+            color: #0066cc;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Paramètres</h1>
+    <form method="post" novalidate>
+        <div class="form-group form-check">
+            <input type="checkbox" class="form-check-input" id="use_timer" name="use_timer" {% if use_timer %}checked{% endif %}>
+            <label class="form-check-label" for="use_timer">Activer le timer en mode Libre</label>
+        </div>
+        <div class="form-group">
+            <label for="timer_duration">Durée du timer (secondes) :</label>
+            <select id="timer_duration" name="timer_duration" class="form-control">
+                <option value="600" {% if timer_duration == 600 %}selected{% endif %}>10 minutes (600 s)</option>
+                <option value="1200" {% if timer_duration == 1200 %}selected{% endif %}>20 minutes (1200 s)</option>
+                <option value="1800" {% if timer_duration == 1800 %}selected{% endif %}>30 minutes (1800 s)</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-success">Enregistrer</button>
+        <a href="{{ url_for('home') }}" class="btn btn-primary">Retour à l'accueil</a>
+    </form>
+</div>
+</body>
+</html>

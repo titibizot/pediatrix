@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mes Statistiques - Pediatrix</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #e8f4ff; /* Fond original */
+            font-family: 'Nunito', sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        h1, h3 {
+            color: #0066cc;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Mes Statistiques</h1>
+    {% if total_games > 0 %}
+        <p>Total des parties jouées : <strong>{{ total_games }}</strong></p>
+        <p>Nombre moyen de tentatives par partie : <strong>{{ avg_attempts|round(2) }}</strong></p>
+        <p>Temps moyen pour trouver la réponse en mode Libre (secondes) : <strong>{{ avg_time|round(2) }}</strong></p>
+    {% else %}
+        <p>Aucune statistique pour le moment.</p>
+    {% endif %}
+    <a href="{{ url_for('home') }}" class="btn btn-primary">Retour à l'accueil</a>
+</div>
+</body>
+</html>
