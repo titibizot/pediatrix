@@ -1,0 +1,15 @@
+# Environnement local
+.env
+
+# Build de Next.js
+.next
+
+# Modules Node
+node_modules
+
+# Divers
+.DS_Store
+*.log
+
+# Configuration TypeScript (si vous le souhaitez)
+tsconfig.json
