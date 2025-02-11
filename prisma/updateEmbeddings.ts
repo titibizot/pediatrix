@@ -4,18 +4,13 @@ import axios from 'axios';
 
 const prisma = new PrismaClient();
 
-/**
- * Fonction qui met à jour l'embedding d'une maladie.
- * Elle prend la description de la maladie (ou tout autre texte représentatif) et appelle l'API OpenAI pour obtenir le vecteur d'embedding.
- * Ensuite, ce vecteur est stocké dans le champ "embedding" de la maladie dans la base de données.
- */
 async function updateEmbeddingForDisease(disease: { id: string; description: string; name: string }) {
   try {
-    // Appel à l'API OpenAI pour calculer l'embedding à partir de la description
+    // Appel à l'API OpenAI pour calculer l'embedding à partir de la description (ou autre champ représentatif)
     const response = await axios.post(
       "https://api.openai.com/v1/embeddings",
       {
-        input: disease.description, // vous pouvez aussi utiliser un champ de mots-clés ou une concaténation de plusieurs champs
+        input: disease.description,
         model: "text-embedding-ada-002"
       },
       {
@@ -25,13 +20,12 @@ async function updateEmbeddingForDisease(disease: { id: string; description: str
         }
       }
     );
-    // Extraction du vecteur embedding retourné par OpenAI
     const embedding = response.data.data[0].embedding;
-
-    // Mise à jour de la maladie dans la base de données avec le nouvel embedding
+    
+    // Met à jour le champ "keywordsembedding" (le nom que Prisma attend d'après l'erreur)
     await prisma.disease.update({
       where: { id: disease.id },
-      data: { embedding }
+      data: { keywordsembedding: embedding }
     });
     console.log(`Embedding mis à jour pour ${disease.name}`);
   } catch (error: any) {
@@ -39,13 +33,8 @@ async function updateEmbeddingForDisease(disease: { id: string; description: str
   }
 }
 
-/**
- * Fonction principale qui récupère toutes les maladies de la spécialité "pediatrie"
- * et met à jour leur embedding en appelant updateEmbeddingForDisease pour chacune.
- */
 async function main() {
   try {
-    // Récupérer toutes les maladies de la spécialité "pediatrie" dans la base
     const diseases = await prisma.disease.findMany({
       where: { specialty: "pediatrie" }
     });
@@ -55,7 +44,6 @@ async function main() {
       return;
     }
 
-    // Pour chaque maladie, mettre à jour son embedding
     for (const disease of diseases) {
       await updateEmbeddingForDisease({
         id: disease.id,
