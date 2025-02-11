@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     }
     const now = new Date();
     const startOfYear = new Date(now.getFullYear(), 0, 0);
-    const diff = now - startOfYear;
+    const diff = now.getTime() - startOfYear.getTime();  // Conversion explicite en nombre
     const oneDay = 1000 * 60 * 60 * 24;
     const dayOfYear = Math.floor(diff / oneDay);
     const dailyDisease = diseases[dayOfYear % diseases.length];
