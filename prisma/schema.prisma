@@ -34,5 +34,6 @@ model GameSession {
   diseaseId  String
   mode       String   // "challenge" ou "libre"
   success    Boolean  @default(false)
+  timeSpent  Int?     // durée en secondes (facultatif)
   createdAt  DateTime @default(now())
 }

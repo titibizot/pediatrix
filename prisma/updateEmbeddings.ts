@@ -5,21 +5,17 @@ import axios from 'axios';
 const prisma = new PrismaClient();
 
 /**
- * Met à jour l'embedding pour une maladie en utilisant ses mots clés.
- * Ici, on joint les mots clés en une seule chaîne, ce qui permet d'obtenir un vecteur global.
+ * Fonction qui met à jour l'embedding d'une maladie.
+ * Elle prend la description de la maladie (ou tout autre texte représentatif) et appelle l'API OpenAI pour obtenir le vecteur d'embedding.
+ * Ensuite, ce vecteur est stocké dans le champ "embedding" de la maladie dans la base de données.
  */
-async function updateEmbeddingForDisease(disease: { id: string; name: string; keywords: string[] }) {
-  if (!disease.keywords || disease.keywords.length === 0) {
-    console.log(`Pas de mots clés pour ${disease.name}`);
-    return;
-  }
+async function updateEmbeddingForDisease(disease: { id: string; description: string; name: string }) {
   try {
-    // Concaténer les mots clés en une chaîne (séparés par un espace)
-    const inputText = disease.keywords.join(" ");
+    // Appel à l'API OpenAI pour calculer l'embedding à partir de la description
     const response = await axios.post(
       "https://api.openai.com/v1/embeddings",
       {
-        input: inputText,
+        input: disease.description, // vous pouvez aussi utiliser un champ de mots-clés ou une concaténation de plusieurs champs
         model: "text-embedding-ada-002"
       },
       {
@@ -29,11 +25,13 @@ async function updateEmbeddingForDisease(disease: { id: string; name: string; ke
         }
       }
     );
+    // Extraction du vecteur embedding retourné par OpenAI
     const embedding = response.data.data[0].embedding;
-    // Mise à jour du champ "keywordsembedding" dans la base
+
+    // Mise à jour de la maladie dans la base de données avec le nouvel embedding
     await prisma.disease.update({
       where: { id: disease.id },
-      data: { keywordsembedding: embedding }
+      data: { embedding }
     });
     console.log(`Embedding mis à jour pour ${disease.name}`);
   } catch (error: any) {
@@ -41,9 +39,13 @@ async function updateEmbeddingForDisease(disease: { id: string; name: string; ke
   }
 }
 
+/**
+ * Fonction principale qui récupère toutes les maladies de la spécialité "pediatrie"
+ * et met à jour leur embedding en appelant updateEmbeddingForDisease pour chacune.
+ */
 async function main() {
   try {
-    // Récupérer toutes les maladies de la spécialité "pediatrie"
+    // Récupérer toutes les maladies de la spécialité "pediatrie" dans la base
     const diseases = await prisma.disease.findMany({
       where: { specialty: "pediatrie" }
     });
@@ -53,16 +55,13 @@ async function main() {
       return;
     }
 
+    // Pour chaque maladie, mettre à jour son embedding
     for (const disease of diseases) {
-      if (Array.isArray(disease.keywords)) {
-        await updateEmbeddingForDisease({
-          id: disease.id,
-          name: disease.name,
-          keywords: disease.keywords
-        });
-      } else {
-        console.log(`Les mots clés pour ${disease.name} ne sont pas au format attendu.`);
-      }
+      await updateEmbeddingForDisease({
+        id: disease.id,
+        description: disease.description,
+        name: disease.name
+      });
     }
   } catch (error) {
     console.error("Erreur dans le script de mise à jour des embeddings:", error);
