@@ -92,7 +92,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Définir les seuils : ici, nous considérons que si le score est supérieur ou égal à 0.80, c'est assez proche.
-    const threshold = 0.87;
+    const threshold = 0.86;
     let color = bestSimilarity >= threshold ? "lightgreen" : "red";
 
     return res.status(200).json({

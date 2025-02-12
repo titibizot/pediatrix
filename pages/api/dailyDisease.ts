@@ -1,27 +1,41 @@
 // pages/api/dailyDisease.ts
+import type { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export default async function handler(req, res) {
+function hashString(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return Math.abs(hash);
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    // Récupérer toutes les maladies de la spécialité "pediatrie" depuis la base de données
     const diseases = await prisma.disease.findMany({
-      where: { specialty: "pediatrie" }
+      where: { specialty: "pediatrie" },
+      orderBy: { name: 'asc' }  // Ordre constant
     });
     if (!diseases.length) {
-      res.status(404).json({ error: "Aucune maladie trouvée" });
-      return;
+      return res.status(404).json({ error: "Aucune maladie trouvée" });
     }
-    const now = new Date();
-    const startOfYear = new Date(now.getFullYear(), 0, 0);
-    const diff = now.getTime() - startOfYear.getTime();  // Conversion explicite en nombre
-    const oneDay = 1000 * 60 * 60 * 24;
-    const dayOfYear = Math.floor(diff / oneDay);
-    const dailyDisease = diseases[dayOfYear % diseases.length];
-    res.status(200).json(dailyDisease);
+    // Utiliser la date UTC au format "YYYY-MM-DD"
+    const today = new Date().toISOString().slice(0, 10);
+    const hash = hashString(today);
+    const index = hash % diseases.length;
+    
+    // Ajout de logs pour déboguer
+    console.log("Liste des maladies :", diseases.map(d => d.name));
+    console.log("Date UTC:", today);
+    console.log("Hash:", hash);
+    console.log("Index calculé:", index);
+    
+    const dailyDisease = diseases[index];
+    return res.status(200).json(dailyDisease);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Erreur lors de la récupération de la maladie du jour" });
+    return res.status(500).json({ error: "Erreur lors de la récupération de la maladie du jour" });
   }
 }
