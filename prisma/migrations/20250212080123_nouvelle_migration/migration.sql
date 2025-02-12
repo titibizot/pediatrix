@@ -13,8 +13,9 @@ CREATE TABLE "User" (
 CREATE TABLE "Disease" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "description" TEXT NOT NULL,
-    "embedding" TEXT,
+    "keywords" TEXT[],
+    "keywordsembedding" JSONB,
+    "link" TEXT NOT NULL,
     "specialty" TEXT NOT NULL,
 
     CONSTRAINT "Disease_pkey" PRIMARY KEY ("id")
@@ -27,6 +28,7 @@ CREATE TABLE "GameSession" (
     "diseaseId" TEXT NOT NULL,
     "mode" TEXT NOT NULL,
     "success" BOOLEAN NOT NULL DEFAULT false,
+    "timeSpent" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "GameSession_pkey" PRIMARY KEY ("id")
