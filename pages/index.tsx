@@ -1,75 +1,157 @@
-// pages/index.tsx
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { signIn, signOut, useSession } from "next-auth/react";
+import axios from "axios";
 
 export default function Home() {
-  const { data: session } = useSession();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [challengeCount, setChallengeCount] = useState(0);
+
+  // Récupérer le nombre de réponses correctes en mode Challenge via l'API
+  useEffect(() => {
+    axios
+      .get("/api/challengeStats")
+      .then((res) => {
+        setChallengeCount(res.data.count);
+      })
+      .catch((err) => console.error(err));
+  }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
-      <h1 className="text-4xl font-bold mb-6">Bienvenue sur Pédiatrix</h1>
-      <p className="mb-4 text-center max-w-2xl">
-        Ce jeu, inspiré de{" "}
-        <Link href="https://cemantix.certitudes.org/" className="underline text-blue-600">
-          Cemantix
-        </Link>
-        , mobilise vos connaissances en pédiatrie tout en vous divertissant. Deux modes sont proposés :
-      </p>
-      <ul className="mb-4 list-disc list-inside text-left max-w-2xl">
-        <li>
-          <strong>Challenge</strong> : Une seule maladie à trouver chaque jour. Soyez le premier parmi vos amis !
-        </li>
-        <li>
-          <strong>Libre</strong> : Jouez autant de parties que vous le souhaitez. Un chronomètre est présent pour limiter le temps de jeu.
-        </li>
-      </ul>
-      <p className="mb-4 text-center max-w-2xl">
-        Dans chaque mode, le but est de deviner une maladie pédiatrique en rapport avec le référentiel.
-        Pour vous aider, entrez des mots-clés (ex : toux, fièvre, infectiologie…) qui s'affichent du rouge au vert selon leur proximité avec la maladie à trouver.
-        Les mots-clés ne sont composés que d'un seul mot, tandis que la maladie peut être formée de plusieurs mots (cela vous sera précisé sur la page de jeu).
-      </p>
-      <div className="flex space-x-4 mb-6">
-        <Link
-          href="/game?mode=challenge"
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Mode Challenge
-        </Link>
-        <Link
-          href="/game?mode=libre"
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-        >
-          Mode Libre
-        </Link>
-      </div>
-      <div className="text-center">
-        {session ? (
-          <>
-            <p className="mb-2">Connecté en tant que {session.user?.email}</p>
-            <button
-              onClick={() => signOut()}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              Se déconnecter
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              onClick={() => signIn()}
-              className="px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600"
-            >
-              Se connecter
-            </button>
-            <p className="mt-2 text-sm">Vous pouvez aussi jouer en invité.</p>
-          </>
+    <div className="min-h-screen bg-gray-100">
+      {/* Barre de navigation */}
+      <nav className="bg-white shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex">
+              <div className="flex-shrink-0 flex items-center">
+                <Link href="/">
+                  <span className="text-xl font-bold text-blue-700">Pédiatrix</span>
+                </Link>
+              </div>
+              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+                <Link
+                  href="/game?mode=challenge"
+                  className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:border-blue-500 hover:text-blue-700"
+                >
+                  Mode Challenge
+                </Link>
+                <Link
+                  href="/game?mode=libre"
+                  className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:border-green-500 hover:text-green-700"
+                >
+                  Mode Libre
+                </Link>
+              </div>
+            </div>
+            <div className="flex items-center">
+              <div className="sm:hidden ml-4">
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+                >
+                  <span className="sr-only">Ouvrir le menu</span>
+                  {mobileMenuOpen ? (
+                    <svg
+                      className="block h-6 w-6"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="block h-6 w-6"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {mobileMenuOpen && (
+          <div className="sm:hidden">
+            <div className="pt-2 pb-3 space-y-1">
+              <Link
+                href="/game?mode=challenge"
+                className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-blue-500 hover:text-blue-700"
+              >
+                Mode Challenge
+              </Link>
+              <Link
+                href="/game?mode=libre"
+                className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-green-500 hover:text-green-700"
+              >
+                Mode Libre
+              </Link>
+            </div>
+          </div>
         )}
+      </nav>
+
+      {/* Header avec image de fond */}
+      <div
+        className="w-full h-64 relative bg-cover bg-center"
+        style={{ backgroundImage: "url('/your-image-path.jpeg')", backgroundPosition: "50% 30%" }}
+      >
+        <div className="absolute inset-0 bg-black opacity-50"></div>
+        <h1 className="relative text-4xl md:text-5xl font-bold text-white text-center pt-40">
+          Bienvenue sur Pédiatrix
+        </h1>
       </div>
-      <div className="mt-8 text-center max-w-2xl">
-        <p className="text-gray-700">
-          Statistiques générales en Challenge : <br />
-          <strong>XX</strong> personnes ont trouvé le mot du jour aujourd'hui.
-        </p>
+
+      {/* Conteneur centré pour la carte */}
+      <div className="flex justify-center">
+        <div className="max-w-2xl w-full mt-8 bg-white shadow-md rounded-lg p-6 text-center">
+          <p className="mb-4 text-gray-700">
+            Ce jeu, inspiré de{" "}
+            <Link href="https://cemantix.certitudes.org/" className="underline text-blue-600 hover:text-blue-800">
+              Cemantix
+            </Link>
+            , met à l’épreuve vos connaissances en pédiatrie tout en vous offrant une expérience ludique et stimulante. Il propose deux modes de jeu distincts :
+          </p>
+          <ul className="mb-4 list-disc list-inside mx-auto text-left">
+            <li>
+              <strong>Challenge</strong> : Chaque jour, relevez le défi en identifiant une unique maladie. Soyez le premier parmi vos amis à trouver la réponse !
+            </li>
+            <li>
+              <strong>Libre</strong> : Lancez autant de parties que vous le souhaitez. Un chronomètre est présent pour limiter le temps de jeu.
+            </li>
+          </ul>
+          <p className="mb-4 text-gray-700">
+            Dans les deux modes, votre objectif est de deviner une maladie pédiatrique référencée dans notre base de données.
+            Pour vous guider, saisissez des mots-clés (ex. : toux, fièvre, infectiologie…) qui s’illuminent de rouge (mot-clé éloigné de la maladie), orange (mot-clé proche des mots-clés associés) ou vert (mot-clé associé à la maladie) en fonction de leur proximité avec la réponse.
+            A toi de jouer :
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
+            <Link
+              href="/game?mode=challenge"
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-transform transform hover:scale-105"
+            >
+              Mode Challenge
+            </Link>
+            <Link
+              href="/game?mode=libre"
+              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-transform transform hover:scale-105"
+            >
+              Mode Libre
+            </Link>
+          </div>
+          <div className="mt-8">
+            <p className="text-gray-700">
+              Statistiques générales en Challenge : <br />
+              <strong>{challengeCount}</strong> personnes ont trouvé le mot du jour aujourd'hui.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

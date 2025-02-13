@@ -7,21 +7,20 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export default NextAuth({
+  secret: process.env.NEXTAUTH_SECRET,  // Assurez-vous que NEXTAUTH_SECRET est défini en production
   adapter: PrismaAdapter(prisma),
   providers: [
-    // Exemple avec Google OAuth
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || ""
     })
-    // Vous pouvez ajouter d'autres providers ici si besoin
   ],
   session: {
-    strategy: "jwt"  // Utilisation du JSON Web Token pour la session
+    strategy: "jwt"
   },
   callbacks: {
     async session({ session, token, user }) {
-      // Ajoutez ici des informations supplémentaires à la session si nécessaire
+      // Ajoutez des informations supplémentaires à la session si nécessaire
       return session;
     }
   }

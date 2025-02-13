@@ -1,12 +1,19 @@
-// pages/api/keyword-similarity.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import axios from 'axios';
+import { newStemmer } from 'snowball-stemmers';
+
+// Initialisation du stemmer pour le français
+const frenchStemmer = newStemmer("french");
 
 /**
- * Normalise un mot : retire les accents et met en minuscules.
+ * Normalise un mot : retire les accents, les tirets, espaces, apostrophes,
+ * met en minuscules, puis applique le stemming.
  */
 function normalizeWord(word: string): string {
-  return word.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  // Supprimer tirets, espaces et apostrophes
+  const cleaned = word.replace(/[-’' ]/g, "");
+  const normalized = cleaned.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  return frenchStemmer.stem(normalized);
 }
 
 /**
@@ -36,9 +43,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   let bestKeyword: string | null = null;
   let foundExact = false;
 
-  // On vérifie si le mot soumis correspond exactement (après normalisation) à l'un des mots clés.
+  // Vérifier la correspondance exacte ou par inclusion (après normalisation)
   for (const keyword of targetKeywords) {
-    if (normalizeWord(keyword) === normalizedStudentWord) {
+    const normalizedKeyword = normalizeWord(keyword);
+    if (
+      normalizedKeyword === normalizedStudentWord ||
+      normalizedKeyword.includes(normalizedStudentWord) ||
+      normalizedStudentWord.includes(normalizedKeyword)
+    ) {
       bestSimilarity = 1.0;
       bestKeyword = keyword;
       foundExact = true;
@@ -50,8 +62,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({
       similarity: bestSimilarity,
       bestKeyword,
-      color: "darkgreen",
-      message: `Correspondance exacte avec le mot clé "${bestKeyword}".`
+      color: "lightgreen",
+      message: `Correspondance exacte ou par inclusion avec le mot clé "${bestKeyword}".`
     });
   }
 
@@ -69,7 +81,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     );
     const studentEmbedding: number[] = studentResponse.data.data[0].embedding;
 
-    // Récupérer en batch les embeddings des mots clés (ceux qui ne sont pas exacts).
+    // Récupérer en batch les embeddings des mots clés.
     const keywordsResponse = await axios.post(
       "https://api.openai.com/v1/embeddings",
       { input: targetKeywords, model: "text-embedding-ada-002" },
@@ -91,9 +103,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // Définir les seuils : ici, nous considérons que si le score est supérieur ou égal à 0.80, c'est assez proche.
+    // Seuil défini pour déterminer la couleur
     const threshold = 0.86;
-    let color = bestSimilarity >= threshold ? "lightgreen" : "red";
+    let color = bestSimilarity >= threshold ? "orange" : "red";
 
     return res.status(200).json({
       similarity: bestSimilarity,
