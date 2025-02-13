@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Game() {
   const router = useRouter();
@@ -123,6 +124,17 @@ export default function Game() {
     return () => clearInterval(interval);
   }, [timeLeft, timerActive]);
 
+  // Fonction de mélange Fisher-Yates
+  const shuffleArray = (array: any[]) => {
+    let currentIndex = array.length, randomIndex;
+    while (currentIndex !== 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+      [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+    return array;
+  };
+
   // Soumission d'un mot-clé
   const handleKeywordSubmit = async (e) => {
     e.preventDefault();
@@ -132,10 +144,10 @@ export default function Game() {
         word: keywordInput,
         targetKeywords,
       });
-      const { color, similarity } = response.data;
+      const { color } = response.data;
       setKeywordsHistory((prev) => [
         ...prev,
-        { word: keywordInput, color, similarity },
+        { word: keywordInput, color },
       ]);
     } catch (error) {
       console.error(error);
@@ -176,11 +188,17 @@ export default function Game() {
     setAnswerInput("");
   };
 
-  // Bouton Indice (mode Libre)
+  // Bouton Indice (mode Libre) : sélectionne exactement 2 mots-clés de la base (ceux avec correspondance 1.0)
   const handleHint = () => {
-    const shuffled = [...targetKeywords].sort(() => 0.5 - Math.random());
-    setHints(shuffled.slice(0, 2));
-  };
+  if (!targetKeywords || targetKeywords.length === 0) return;
+  // On sélectionne aléatoirement 2 mots parmi targetKeywords
+  const shuffled = shuffleArray([...targetKeywords]);
+  const selectedHints = shuffled.slice(0, 2);
+  setHints(selectedHints);
+  // Optionnel : mettre à jour aussi le feedback avec ces indices
+  setFeedback(`Indices : ${selectedHints.join(", ")}`);
+};
+
 
   // Bouton Réponse (mode Libre)
   const handleShowAnswer = () => {
@@ -210,88 +228,75 @@ export default function Game() {
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
+  // Tri des mots-clés soumis par ordre de couleur : verts en haut, puis oranges, puis rouges
+  const sortedKeywordsHistory = [...keywordsHistory].sort((a, b) => {
+    const order = { darkgreen: 1, green: 1, orange: 2, red: 3 };
+    return (order[a.color] || 4) - (order[b.color] || 4);
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
-      {/* Bandeau de navigation */}
+      {/* Barre de navigation */}
       <nav className="bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex space-x-8">
-              <span className="text-xl font-bold text-blue-700">Pédiatrix</span>
-              <Link href="/" className="text-sm font-medium text-gray-500 hover:text-gray-700">
-                Page d'accueil
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+          <div className="flex items-center space-x-3">
+            {/* Logo agrandi et zoomé */}
+            <Image
+              src="/logo.jpeg"
+              alt="Logo Pédiatrix"
+              width={160}
+              height={160}
+              className="object-cover rounded-full"
+            />
+            <span className="text-2xl font-bold text-blue-700">Pédiatrix</span>
+          </div>
+          <div className="flex space-x-8">
+            <Link href="/" className="text-sm font-medium text-gray-500 hover:text-gray-700">
+              Page d'accueil
+            </Link>
+            {isChallenge && (
+              <Link href="/game?mode=libre" className="text-sm font-medium text-gray-500 hover:text-gray-700">
+                Jeu libre
               </Link>
-              {isChallenge && (
-                <Link
-                  href="/game?mode=libre"
-                  className="text-sm font-medium text-gray-500 hover:text-gray-700"
-                >
-                  Jeu libre
-                </Link>
+            )}
+            {isLibre && (
+              <Link href="/game?mode=challenge" className="text-sm font-medium text-gray-500 hover:text-gray-700">
+                Challenge
+              </Link>
+            )}
+          </div>
+          <div className="sm:hidden ml-4">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+            >
+              <span className="sr-only">Ouvrir le menu</span>
+              {mobileMenuOpen ? (
+                <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
               )}
-              {isLibre && (
-                <Link
-                  href="/game?mode=challenge"
-                  className="text-sm font-medium text-gray-500 hover:text-gray-700"
-                >
-                  Challenge
-                </Link>
-              )}
-            </div>
-            <div className="sm:hidden ml-4">
-              <button
-                type="button"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-              >
-                <span className="sr-only">Ouvrir le menu</span>
-                {mobileMenuOpen ? (
-                  <svg
-                    className="block h-6 w-6"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                ) : (
-                  <svg
-                    className="block h-6 w-6"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                )}
-              </button>
-            </div>
+            </button>
           </div>
         </div>
         {mobileMenuOpen && (
           <div className="sm:hidden">
             <div className="pt-2 pb-3 space-y-1">
-              <Link
-                href="/"
-                className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-500 hover:text-gray-800"
-              >
+              <Link href="/" className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-500 hover:text-gray-800">
                 Page d'accueil
               </Link>
               {isChallenge && (
-                <Link
-                  href="/game?mode=libre"
-                  className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-green-500 hover:text-green-700"
-                >
+                <Link href="/game?mode=libre" className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-green-500 hover:text-green-700">
                   Jeu libre
                 </Link>
               )}
               {isLibre && (
-                <Link
-                  href="/game?mode=challenge"
-                  className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-blue-500 hover:text-blue-700"
-                >
+                <Link href="/game?mode=challenge" className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-blue-500 hover:text-blue-700">
                   Challenge
                 </Link>
               )}
@@ -369,16 +374,16 @@ export default function Game() {
               {/* Légende des couleurs pour les mots-clés */}
               <div className="mb-4 text-sm text-gray-600">
                 <span className="font-medium">Légende : </span>
-                <span className="text-red-500">Rouge</span> : Mot ayant peu de similarité avec la maladie (ou les mots-clés associés),{" "}
-                <span className="text-orange-500">Orange</span> : Mot ayant une similarité forte avec la maladie (ou les mots-clés associés),{" "}
-                <span className="text-green-500">Vert</span> : Mot faisant partie des mots-clés associés à la maladie dans la base.
+                <span className="text-red-500">Rouge</span> : Mot peu similaire,{" "}
+                <span className="text-orange-500">Orange</span> : Mot très proche,{" "}
+                <span className="text-green-500">Vert</span> : Mot exact.
               </div>
 
-              {/* Historique des mots-clés */}
+              {/* Historique des mots-clés trié par couleur */}
               <div className="mb-6">
                 <h3 className="font-semibold text-gray-800 mb-2">Historique des mots-clés :</h3>
                 <ul className="list-disc pl-5">
-                  {keywordsHistory.map((entry, index) => (
+                  {sortedKeywordsHistory.map((entry, index) => (
                     <li key={index} style={{ color: entry.color }} className="mb-1">
                       {entry.word}
                     </li>
@@ -430,7 +435,7 @@ export default function Game() {
               )}
             </>
           ) : (
-            // Si la page est figée en mode Challenge, afficher uniquement le message final
+            // Mode Challenge figé
             <div className="mb-6">
               <p className="text-lg font-medium text-gray-800">{feedback}</p>
               {correct && (
