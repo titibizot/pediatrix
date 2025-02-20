@@ -11,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Construire la condition de filtre : si specialty est fourni, on filtre sur la relation specialties
     const filter = specialty
-  ? { specialties: { some: { name: { equals: specialty.toString(), mode: 'insensitive' } } } }
+  ? { specialties: { some: { name: { equals: specialty.toString(), mode: 'insensitive' as const } } } }
   : {};
 
     // Récupérer toutes les maladies correspondant au filtre
