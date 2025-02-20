@@ -47,7 +47,7 @@ export default function Game() {
     if (isChallenge) {
       setLoading(true);
       axios
-        .get("/api/dailyDisease")
+        .get("/api/dailyDisease?=specialty=gynécologie")
         .then((res) => {
           setDailyDisease(res.data);
           setLoading(false);
@@ -64,7 +64,7 @@ export default function Game() {
     if (isLibre) {
       setLoading(true);
       axios
-        .get("/api/randomDisease")
+        .get("/api/randomDisease?=specialty=gynécologie")
         .then((res) => {
           setCurrentDisease(res.data);
           setLoading(false);
@@ -209,7 +209,7 @@ export default function Game() {
   // Bouton Nouvelle Partie (mode Libre)
   const handleNewGame = () => {
     axios
-      .get("/api/randomDisease")
+      .get("/api/randomDisease?=specialty=gynécologie")
       .then((res) => {
         setCurrentDisease(res.data);
         setKeywordsHistory([]);

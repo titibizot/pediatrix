@@ -27,7 +27,7 @@ async function updateKeywordsEmbeddingForDisease(disease: { id: string; name: st
     
     await prisma.disease.update({
       where: { id: disease.id },
-      data: { keywordsembedding: embeddings }  // Utilisation de "keywordsembedding" au lieu de "keywordsEmbeddings"
+      data: { keywordsembedding: embeddings }  // Mise à jour de la propriété "keywordsembedding"
     });
     console.log(`Keywords embeddings mis à jour pour ${disease.name}`);
   } catch (error: any) {
@@ -38,7 +38,7 @@ async function updateKeywordsEmbeddingForDisease(disease: { id: string; name: st
 async function main() {
   try {
     const diseases = await prisma.disease.findMany({
-      where: { specialty: "pediatrie" }
+      where: { specialties: { some: { name: "pediatrie" } } }
     });
 
     if (diseases.length === 0) {

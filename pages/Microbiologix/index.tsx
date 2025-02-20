@@ -40,13 +40,13 @@ export default function Home() {
             </div>
             <div className="flex space-x-8">
               <Link 
-                href="/Pediatrix/game?mode=challenge" 
+                href="/Microbiologix/game?mode=challenge" 
                 className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:border-blue-500 hover:text-blue-700"
               >
                 Mode Challenge
               </Link>
               <Link 
-                href="/Pediatrix/game?mode=libre" 
+                href="/Microbiologix/game?mode=libre" 
                 className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:border-green-500 hover:text-green-700"
               >
                 Mode Libre
@@ -76,13 +76,13 @@ export default function Home() {
           <div className="sm:hidden">
             <div className="pt-2 pb-3 space-y-1">
               <Link 
-                href="/Pediatrix/game?mode=challenge" 
+                href="/Microbiologix/game?mode=challenge" 
                 className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-blue-500 hover:text-blue-700"
               >
                 Mode Challenge
               </Link>
               <Link 
-                href="/Pediatrix/game?mode=libre" 
+                href="/Microbiologix/game?mode=libre" 
                 className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-green-500 hover:text-green-700"
               >
                 Mode Libre
@@ -147,13 +147,13 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
             <Link
-              href="/Pediatrix/game?mode=challenge"
+              href="/Microbiologix/game?mode=challenge"
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-transform transform hover:scale-105"
             >
               Mode Challenge
             </Link>
             <Link
-              href="/Pediatrix/game?mode=libre"
+              href="/Microbiologix/game?mode=libre"
               className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-transform transform hover:scale-105"
             >
               Mode Libre

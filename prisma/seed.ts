@@ -4,7 +4,6 @@ const prisma = new PrismaClient();
 
 async function main() {
   // Supprimez toutes les entrées existantes dans la table Disease
-  await prisma.disease.deleteMany({});
   
   // Exemple de données de seed
   const diseases = [
@@ -1122,6 +1121,7 @@ async function main() {
         },
 		{
           where: { name: "infectiologie" },
+		  create: { name: "infectiologie" },
        }
       ]
 	}
@@ -1867,7 +1867,7 @@ async function main() {
           create: { name: "gynécologie" },
        },
         {
-          where: { name: "pédiatree" },
+          where: { name: "pediatrie" },
           create: { name: "pediatrie" },
        }
       ]
@@ -2376,15 +2376,16 @@ async function main() {
 	}
  ];
   // Insérez les données en utilisant skipDuplicates pour éviter les erreurs si des doublons existent
-  await prisma.disease.createMany({
-    data: diseases,
-    skipDuplicates: true
+for (const disease of diseases) {
+  await prisma.disease.create({
+    data: disease,
   });
 
   console.log("Seed terminé");
 }
+}
 main()
-  .catch(e => {
+  .catch((e) => {
     console.error(e);
     process.exit(1);
   })
