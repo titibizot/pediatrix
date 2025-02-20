@@ -12,7 +12,7 @@ async function main() {
       name: "Bronchiolite",
         keywords: [
           "toux", "fièvre", "dyspnée", "sifflements", "Nourrisson",
-          "mucus", "Virus", "crépitants", "Pneumologie",
+          "mucus", "Virus", "crépitants", "pneumologie",
           "apnée", "irritabilité", "Sibilants", "hypoxémie", "tachypnée",
           "Détresse", "broncho", "inflammation", "sevrage", "Infection",
           "ventilation", "sibilants", "régurgitations", "dyspnée",
@@ -22,8 +22,23 @@ async function main() {
 		  "cyanose", "rhinovirus"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/pneumologie-cardiologie/bronchiolite-aigue-du-nourrisson",
-        specialty: "pediatrie"
-      },
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "pneumologie" },
+          create: { name: "pneumologie" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+        }
+      ]
+	}
+},
       {
         name: "Otite",
         keywords: [
@@ -36,8 +51,23 @@ async function main() {
           "récurrence", "hyperalgie", "aérateurs", "streptocoque", "pneumocoque", "eustache"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/otites",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "ORL" },
+          create: { name: "ORL" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
       {
         name: "Gastro-entérite",
         keywords: [
@@ -51,8 +81,23 @@ async function main() {
 		  "dysentérie", "selles"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/diarrhee-aigue",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Gastroentérologie" },
+          create: { name: "Gastroentérologie" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	   {
         name: "Appendicite",
         keywords: [
@@ -65,8 +110,23 @@ async function main() {
           "Bactérie", "Péritonite", "gastroentérologie"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/gastroenterologie-nutrition-chirurgie-abdomino-pelvienne/douleurs-abdominopelviennes",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Chirurgie viscérale" },
+          create: { name: "Chirurgie viscérale" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	   {
         name: "Pneumonie",
         keywords: [
@@ -79,8 +139,23 @@ async function main() {
           "Pleurésie", "Lobaire", "Alvéole", "Dyspnée"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/pneumologie-cardiologie/pneumonies-aigues-communautaires",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "pneumologie" },
+          create: { name: "pneumologie" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Diabète",
         keywords: [
@@ -92,8 +167,19 @@ async function main() {
           "Glucose", "Autocontrôle", "Cétonurie"
         ],
         link: "https://www.pedia-univ.fr/node/247",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "endocrinologie" },
+          create: { name: "endocrinologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Méningite",
         keywords: [
@@ -105,8 +191,23 @@ async function main() {
           "Nourrisson", "Antibioprophylaxie", "Brudzinski", "Kernig", "Fulminans"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/meningites-meningo-encephalites",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "neurologie" },
+          create: { name: "neurologie" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Kawasaki",
         keywords: [
@@ -117,20 +218,42 @@ async function main() {
           "Conjonctive", "Échographie", "Immunoglobulines", "Hyperthermie", "Aspirine",
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/eruptions-febriles",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Syndrome néphrotique",
         keywords: [
-          "Néphrologie", "Protéinurie", "Oedèmes", "infection", "Hypoalbuminémie",
+          "Néphrologie", "Protéinurie", "Oedèmes", "Hypoalbuminémie",
           "Corticoïdes", "Rémission", "Rechute", "Urines", "Filtration",
           "Albumine", "Diurèse", "Biopsie", "Hypoprotéinémie", "Reins",
           "Néphropathie", "Hématurie", "Dialyse", "Hypertension", 
           "Protéines"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/nephrologie-chirurgie-urologique/proteinurie-syndrome-nephrotique-hematurie",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "nephrologie" },
+          create: { name: "nephrologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Coqueluche",
         keywords: [
@@ -141,8 +264,23 @@ async function main() {
           "Vaccination"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/coqueluche",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "pneumologie" },
+          create: { name: "pneumologie" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Asthme",
         keywords: [
@@ -154,8 +292,19 @@ async function main() {
 		  "Bronchodilatateur", "Spirométrie"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/pneumologie-cardiologie/asthme",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "pneumologie" },
+          create: { name: "pneumologie" },
+       }
+      ]
+	}
+},
 	   {
         name: "Rubéole",
         keywords: [
@@ -166,8 +315,23 @@ async function main() {
           "Surdité", "Malformation"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/eruptions-febriles",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Dermatologie" },
+          create: { name: "Dermatologie" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Varicelle",
         keywords: [
@@ -178,8 +342,23 @@ async function main() {
           "Hyperthermie", "Cérébellite", "Surinfection", "Impetigo"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/eruptions-febriles",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Dermatologie" },
+          create: { name: "Dermatologie" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Scarlatine",
         keywords: [
@@ -190,8 +369,23 @@ async function main() {
           "Ganglions", "Douleur", "Toxine", "température", "Streptatest", "rash"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/eruptions-febriles",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Dermatologie" },
+          create: { name: "Dermatologie" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	   {
         name: "Rougeole",
         keywords: [
@@ -202,8 +396,23 @@ async function main() {
           "Immunoglobulines", "Exanthème", "Température", "lymphadénopathie"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/eruptions-febriles",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "ORL" },
+          create: { name: "ORL" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Mégalérythème épidémique",
         keywords: [
@@ -214,8 +423,23 @@ async function main() {
           "Polyarthrite", "Exanthème", "Température", "Anémie", "Erythroblastopénie"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/eruptions-febriles",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Dermatologie" },
+          create: { name: "Dermatologie" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	    {
         name: "Roséole",
         keywords: [
@@ -225,8 +449,23 @@ async function main() {
           "Rhinite", "Exanthème", "Température"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/eruptions-febriles",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Dermatologie" },
+          create: { name: "Dermatologie" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	   {
         name: "Anémie",
         keywords: [
@@ -237,8 +476,19 @@ async function main() {
 		  "Hémolyse", "Ferriprive", "Myélodysplasie", "thalassémie", "drépanocytose"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/hematologie-cancerologie/anemie-pathologies-du-fer",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Hématologie" },
+          create: { name: "Hématologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Allergie aux protéines de lait de vache",
         keywords: [
@@ -249,8 +499,19 @@ async function main() {
 		  "Urticaire", "Réintroduction", "Exclusion"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/pneumologie-cardiologie/hypersensibilites-allergies",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+		{
+          where: { name: "Gastroentérologie" },
+          create: { name: "Gastroentérologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Turner",
         keywords: [
@@ -261,8 +522,19 @@ async function main() {
 		  "Oedèmes", "Caryotype", "Congénital"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/croissance-developpement/chapitre-1-items-53-243-croissance-normale-pathologique",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Génétique" },
+          create: { name: "Génétique" },
+       }
+      ]
+	}
+},
 	  {
         name: "Maladie coeliaque",
         keywords: [
@@ -273,8 +545,19 @@ async function main() {
 		  "Anémie", "Inflammation", "Histologie", "Endoscopie", "selles", "absorption"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/gastroenterologie-nutrition-chirurgie-abdomino-pelvienne/diarrhee-chronique",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Gastroentérologie" },
+          create: { name: "Gastroentérologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Épilepsie",
         keywords: [
@@ -285,8 +568,19 @@ async function main() {
 		  "Fièvre"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/neurologie/convulsions-crises-depilepsie-epilepsie",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "neurologie" },
+          create: { name: "neurologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Hirschsprung",
         keywords: [
@@ -296,8 +590,19 @@ async function main() {
           "Selles", "Nerf", "Ganglionnaire", "Dilatation"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/gastroenterologie-nutrition-chirurgie-abdomino-pelvienne/constipation",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Chirurgie viscérale" },
+          create: { name: "Chirurgie viscérale" },
+       }
+      ]
+	}
+},
 	  {
         name: "Purpura rhumatoide",
         keywords: [
@@ -307,8 +612,19 @@ async function main() {
           "Hématome", "Invagination", "Hyperalgie", "Eruption"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/hematologie-cancerologie/purpura",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "nephrologie" },
+          create: { name: "nephrologie" },
+       }
+      ]
+	}
+},
 	   {
         name: "Drépanocytose",
         keywords: [
@@ -320,8 +636,19 @@ async function main() {
 		  "STA", "Ischémie", "Vasculaire"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/hematologie-cancerologie/anemie-pathologies-du-fer",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Hématologie" },
+          create: { name: "Hématologie" },
+       }
+      ]
+	}
+},
 	   {
         name: "Mucovisidose",
         keywords: [
@@ -332,8 +659,23 @@ async function main() {
 		  "Colonisation", "Hypochlorémie", "Dépistage"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/pneumologie-cardiologie/specificites-maladies-genetiques-propos-dune-maladie-genique-mucoviscidose",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "pneumologie" },
+          create: { name: "pneumologie" },
+        },
+		{
+          where: { name: "Génétique" },
+          create: { name: "Génétique" },
+       }
+      ]
+	}
+},
 	  {
         name: "Hypothyroidie congénitale",
         keywords: [
@@ -343,31 +685,19 @@ async function main() {
           "Poids", "Constipation", "Hypométabolisme", "Athyréose", "Endocrinien"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/neonatologie/prise-charge-du-nouveau-ne",
-        specialty: "pediatrie"
-      },
-	  {
-        name: "Hypothyroidie congénitale",
-        keywords: [
-          "Nourrisson", "Endocrinologie", "Néonatal", "Retard", "Croissance",
-          "Hypotonie", "Ictère", "Fatigue", "TSH", "COngénital",
-          "Thyroide", "Hormone", "Glande", "T3", "Bradycardie", 
-          "Poids", "Constipation", "Hypométabolisme", "Athyréose", "Endocrinien"
-        ],
-        link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/neonatologie/prise-charge-du-nouveau-ne",
-        specialty: "pediatrie"
-      },
-	  {
-        name: "Allergie",
-        keywords: [
-          "Enfant", "Immunologie", "Prurit", "Anaphylaxie", "Oedème",
-          "Asthme", "Régime", "Diarrhée", "Protéine", "Vomissements",
-          "Antihistaminique", "Eruption", "Hypersensibilité", "Bronchospasme", "Squelettique", 
-          "Intolérance", "Aliments", "IgE", "Histamine", "Éosinophilie",
-		  "Urticaire", "Eviction", "Exclusion", "Choc", "Urticaire", "Conjonctivite"
-        ],
-        link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/pneumologie-cardiologie/hypersensibilites-allergies",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Endocrinologie" },
+          create: { name: "Endocrinologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Luxation congénitale de hanches",
         keywords: [
@@ -377,8 +707,19 @@ async function main() {
           "Malformation", "Rotation", "Néonatal"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/croissance-developpement/depistages-lenfant",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Orthopedie" },
+          create: { name: "Orthopedie" },
+        }
+      ]
+	}
+},
 	  {
         name: "Pyélonéphrite",
         keywords: [
@@ -389,8 +730,23 @@ async function main() {
 		  "Abcès", "Antibiothérapie"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/infections-urinaires",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "nephrologie" },
+          create: { name: "nephrologie" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Arthrite",
         keywords: [
@@ -401,8 +757,23 @@ async function main() {
 		  "IRM", "Antibiothérapie"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/urgences-reanimation-chirurgie-orthopedique/boiteries-infections-osteoarticulaires",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Orthopédie" },
+          create: { name: "Orthopédie" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Ostéomyélite",
         keywords: [
@@ -413,8 +784,23 @@ async function main() {
 		  "IRM", "Antibiothérapie", "Sepsis"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/urgences-reanimation-chirurgie-orthopedique/boiteries-infections-osteoarticulaires",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Orthopédie" },
+          create: { name: "Orthopédie" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Glomérulonéphrite aigue",
         keywords: [
@@ -425,8 +811,19 @@ async function main() {
           "Protéines", "Anticorps"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/nephrologie-chirurgie-urologique/proteinurie-syndrome-nephrotique-hematurie",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "nephrologie" },
+          create: { name: "nephrologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Laryngite",
         keywords: [
@@ -436,8 +833,23 @@ async function main() {
           "Adrénaline", "Larynx", "Muqueuse", "Inspiratoire"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/pneumologie-cardiologie/detresse-respiratoire-aigue",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "ORL" },
+          create: { name: "ORL" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Encéphalite",
         keywords: [
@@ -447,8 +859,23 @@ async function main() {
           "Vomissements", "IRM", "Electroencéphalogramme", "Méninges"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/meningites-meningo-encephalites",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "neurologie" },
+          create: { name: "neurologie" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	   {
         name: "Insuffisance rénale",
         keywords: [
@@ -460,8 +887,23 @@ async function main() {
 		  "Fonctionnelle", "Glomérule"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/nephrologie-chirurgie-urologique/insuffisance-renale-aigue-maladie-renale-chronique",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "nephrologie" },
+          create: { name: "nephrologie" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Hypertension artérielle",
         keywords: [
@@ -472,8 +914,19 @@ async function main() {
           "Surrénales"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/nephrologie-chirurgie-urologique/hypertension-arterielle",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Cardiologie" },
+          create: { name: "Cardiologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Trisomie 21",
         keywords: [
@@ -484,8 +937,19 @@ async function main() {
 		  "Comportemental", "Caryotype", "Congénital"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/enfant-vulnerable-genetique/trisomie-21",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Génétique" },
+          create: { name: "Génétique" },
+       }
+      ]
+	}
+},
 	  {
         name: "X fragile",
         keywords: [
@@ -497,8 +961,19 @@ async function main() {
 		  "Déficience"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/enfant-vulnerable-genetique/syndrome-lx-fragile",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Génétique" },
+          create: { name: "Génétique" },
+       }
+      ]
+	}
+},
 	  {
         name: "Anorexie mentale",
         keywords: [
@@ -510,8 +985,19 @@ async function main() {
 		  "Déficience"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/medecine-ladolescent-0/troubles-conduites-alimentaires-ladolescent",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Psychiatrie" },
+          create: { name: "Psychiatrie" },
+       }
+      ]
+	}
+},
 	   {
         name: "Tentative de suicide",
         keywords: [
@@ -523,8 +1009,19 @@ async function main() {
 		  "Traumatisme", "Récurrence"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/medecine-ladolescent-0/risque-conduite-suicidaires-lenfant-ladolescent",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Psychiatrie" },
+          create: { name: "Psychiatrie" },
+       }
+      ]
+	}
+},
 	   {
         name: "Tuberculose",
         keywords: [
@@ -537,8 +1034,23 @@ async function main() {
           "Miliaire", "Pneumonie"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/pneumologie-cardiologie/tuberculose",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "pneumologie" },
+          create: { name: "pneumologie" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Angine",
         keywords: [
@@ -548,8 +1060,23 @@ async function main() {
           "Gonflement", "Odynophagie", "Muqueuse", "Streptatest"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/angines",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "ORL" },
+          create: { name: "ORL" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Sinusite",
         keywords: [
@@ -559,8 +1086,23 @@ async function main() {
           "Streptocoque", "Ethmoidite", "Température", "Hyperthermie"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/sinusites",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "ORL" },
+          create: { name: "ORL" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Paludisme",
         keywords: [
@@ -572,8 +1114,18 @@ async function main() {
 		  "Antipaludique", "Hématologie"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/pathologies-infectieuses-du-migrant-lenfant-voyageur",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+		{
+          where: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Impétigo",
         keywords: [
@@ -584,8 +1136,23 @@ async function main() {
 		  "Peau", "Suppuration", "Démangeaisons", "Rougeurs", "Toxines"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/infections-cutanees-bacteriennes",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Dermatologie" },
+          create: { name: "Dermatologie" },
+        },
+		{
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Reflux gastro-oesophagien",
         keywords: [
@@ -596,8 +1163,19 @@ async function main() {
 		  "Inflammation", "Muqueuse", "Crise"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/gastroenterologie-nutrition-chirurgie-abdomino-pelvienne/reflux-gastro-oesophagien-nourrisson-lenfant",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Gastroentérologie" },
+          create: { name: "Gastroentérologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Sténose du pylore",
         keywords: [
@@ -608,8 +1186,19 @@ async function main() {
 		  "gastrique", "abdominale", "échographie", "Digestion"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/gastroenterologie-nutrition-chirurgie-abdomino-pelvienne/douleurs-abdominopelviennes",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Chirurgie viscérale" },
+          create: { name: "Chirurgie viscérale" },
+       }
+      ]
+	}
+},
 	    {
         name: "Invagination intestinale aigue",
         keywords: [
@@ -620,8 +1209,19 @@ async function main() {
 		  "gastrique", "abdominale", "échographie", "Digestion"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/gastroenterologie-nutrition-chirurgie-abdomino-pelvienne/douleurs-abdominopelviennes",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Gastroentérologie" },
+          create: { name: "Gastroentérologie" },
+       }
+      ]
+	}
+},
 	   {
         name: "Torsion testiculaire",
         keywords: [
@@ -632,8 +1232,19 @@ async function main() {
 		  "échographie", "Digestion"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/gastroenterologie-nutrition-chirurgie-abdomino-pelvienne/douleurs-abdominopelviennes",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Urologie" },
+          create: { name: "Urologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Hernie inguinale",
         keywords: [
@@ -644,10 +1255,21 @@ async function main() {
 		  "échographie", "Digestion"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/gastroenterologie-nutrition-chirurgie-abdomino-pelvienne/pathologies-courantes-region-inguino-scrotale-du-penis",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Chirurgie viscérale" },
+          create: { name: "Chirurgie viscérale" },
+       }
+      ]
+	}
+},
 	  {
-        name: "Ictère",
+        name: "Ictère néonatal",
         keywords: [
           "Nourrisson", "Hépatolonie", "Néonatalogie", "Bilirubine", "Néonatal",
           "Hémolyse", "Foie", "Photothérapie", "Hépatique", "Anémie",
@@ -656,8 +1278,15 @@ async function main() {
 		  "Cholestase", "echographie"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/neonatologie/ictere-neonatal",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Leucémie",
         keywords: [
@@ -669,8 +1298,23 @@ async function main() {
 		  "Lymphome", "Aplasie"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/hematologie-cancerologie/cancers",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Hématologie" },
+          create: { name: "Hématologie" },
+        },
+		{
+          where: { name: "Oncologie" },
+          create: { name: "Oncologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Nephroblastome",
         keywords: [
@@ -682,10 +1326,21 @@ async function main() {
 		  "Chirurgie"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/hematologie-cancerologie/cancers",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Oncologie" },
+          create: { name: "Oncologie" },
+       }
+      ]
+	}
+},
 	   {
-        name: "Cardiopathie",
+        name: "Cardiopathie congénitale",
         keywords: [
           "Nourrisson", "Cardiologie", "Cyanose", "Insuffisance", "Valve",
           "Septum", "Congénital", "Tachycardie", "Circulation", "Echographie",
@@ -695,8 +1350,19 @@ async function main() {
 		  "Sténose", "Hypertophique", "dilatée"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/pneumologie-cardiologie/souffle-cardiaque",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Cardiologie" },
+          create: { name: "Cardiologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Scoliose",
         keywords: [
@@ -708,8 +1374,19 @@ async function main() {
 		  "Arthrodèse", "Gibbosité"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/croissance-developpement/depistages-lenfant",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Orthopedie" },
+          create: { name: "Orthopedie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Maltraitance",
         keywords: [
@@ -720,8 +1397,15 @@ async function main() {
 		  "Plainte"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/enfant-vulnerable-genetique/maltraitance",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Puberté précoce",
         keywords: [
@@ -732,8 +1416,19 @@ async function main() {
 		  "Echographie", "radiographie", "IRM"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/croissance-developpement/puberte-normale-pathologique",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Endocrinologie" },
+          create: { name: "Endocrinologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Insuffisance surrénale",
         keywords: [
@@ -744,8 +1439,19 @@ async function main() {
 		  "Hémodynamique", "COngénital", "Rénine", "Métabolisme", "Biopsie"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/endocrinologie-metabolisme/insuffisance-surrenale",
-        specialty: "pediatrie"
-      },
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+        },
+        {
+          where: { name: "Endocrinologie" },
+          create: { name: "Endocrinologie" },
+       }
+      ]
+	}
+},
 	  {
         name: "Intoxication au CO",
         keywords: [
@@ -756,9 +1462,918 @@ async function main() {
 		  "Confusion", "Oxygène", "Saturation", "Respiration"
         ],
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/urgences-reanimation-chirurgie-orthopedique/intoxications-aigues",
-        specialty: "pediatrie"
-      },
-      // Vous pouvez ajouter d'autres maladies ici...
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+       }
+      ]
+	}
+},
+	  {
+      name: "grossesse extra utérine",
+        keywords: [
+          "Douleur", "hcg", "rhésus", "échographie", "métrorragies",
+          "saignement", "masse", "méthotrexate", "salpingectomie",
+          "Hémopéritoine", "endométriose", "tabac", "aménorrhée", "masse latéro-utérine",
+          "stagnation", "récidive", "vacuité", "chirurgie", "médicament",
+          "Rhophylac", "ectopique", "microprogestatif", "épanchement",
+          "FIV", "gynécologie", "obstétrique"
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       }
+      ]
+	}
+},
+      {
+        name: "fibrome",
+        keywords: [
+          "Fréquent", "myomètre", "douleur", "métrorragies", "myome",
+          "Tumeur", "bénin", "compression", "infertilité", "anémie",
+          "Nécrobiose", "asymptomatique", "échographie", "hypoéchogène", "IRM",
+          "Hystéroscopie", "hystérectomie", "myomectomie", "progestatif", 
+          "Embolisation", "hormonodépendant", "dysurie", "pesanteur", "constipation",
+          "DIU", "FIGO", "sous séreux", "sous muqueux",
+          "Intra mural", "gynécologie", "obstétrique" 
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       }
+      ]
+	}
+},
+    {	
+		name: "adénomyose",
+        keywords: [
+          "Fréquent", "endomètre", "ectopique", "ménorragies", "dysménorrhée",
+          "Multiparité", "échographie", "IRM", "endométrectomie",
+          "Hystérectomie", "DIU", "asymétrie antéro-postérieure", "kyste", "infertilité",
+          "Métrorragies", "conservateur", "récidive", "gynécologie", "obstétrique" 
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       }
+      ]
+	}
+},
+{
+        name: "endométriose",
+        keywords: [
+          "Dysménorrhée", "dyspareunie", "dysurie", "dyschésie", "infertilité",
+          "Endomètre", "ectopique", "endométriose", "kyste", "ovaire",
+          "Vessie", "pneumothorax", "superficielle", "profonde", "torus",
+          "Antalgiques", "ALD", "absentéisme", "shaving", 
+          "Contraception", "rectum", "nodule", "échographie", "IRM",
+          "Coloscanner", "poussée", "cyclique", "hormono-dépendant",
+          "chronique", "coelioscopie","hystérectomie", "gynécologie", "obstétrique"
+        ],
+        link:"",
+		specialties: {
+      connectOrCreate: [		
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       }
+      ]
+	}
+},
+ {
+        name: "polype",
+        keywords: [
+          "Endomètre", "asymptomatique", "tumeur", "bénin", "pédiculé",
+          "Sessile", "fréquent", "hypertrophie", "obésité", "métrorragies",
+          "Infertilité", "échographie", "hyperéchogène", "arrondie",
+          "Vascularisée", "hystéroscopie", "résection", "gynécologie", "obstétrique" 
+        ],
+        link:"", 
+		specialties: {
+      connectOrCreate: [		
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       }
+      ]
+	}
+},
+ {
+        name: "ménopause",
+        keywords: [
+          "Physiologique", "aménorrhée", "climatérique", "bouffées vasomotrices", "sécheresse",
+          "Humeur", "libido", "asthénie", "anxiété", "prurit",
+          "Dyspareunie", "pollakiurie", "urgenturie", "ostéoporose",
+          "Cardiovasculaire", "dyslipidémie", "clinique", "vitamine D", "Calcium", "Mammographie", "phytothérapie", "hormonothérapie", "substitutif",
+		  "combiné", "séquentiel", "mastodynie", "acide hyaluronique", "biphosphonates", "Score", "Progestatifs", "oestrogènes", "carence", "gynécologie", "obstétrique"
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+        },
+        {
+          where: { name: "endocrinologie" },
+          create: { name: "endocrinologie" },
+        },
+		{
+          where: { name: "médecine générale" },
+          create: { name: "médecine générale" },
+       }
+      ]
+	}
+},
+ {
+        name: "contraception",
+        keywords: [
+          "Thrombose", "pilule", "stérilet", "implant", "préservatif",
+          "Progestatif", "oestroprogestatif", "Quick Start", "Grossesse", "spotting",
+          "Gratuit", "urgence", "aménorrhée", "oublie", "Indice de Pearl",
+		  "Endomètre", "Ovulation", "cancer", "ligature", "vasectomie", "glaire", "gynécologie", "obstétrique" 
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       },
+        {
+          where: { name: "endocrinologie" },
+          create: { name: "endocrinologie" },
+       },
+		{
+          where: { name: "médecine générale" },
+          create: { name: "médecine générale" },
+       }
+      ]
+	}
+},
+{
+        name: "Interruption volontaire de grossesse",
+        keywords: [
+          "Chirurgie", "aspiration", "contraception", "grossesse", "hcg",
+          "Échographie", "datation", "hémorragie", "mifépristone", "mifégyne",
+          "Aménorrhée", "terme limité", "16 semaines", "réglementation", "débat", "dépistage", "gynécologie", "obstétrique"
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       },
+        {
+          where: { name: "endocrinologie" },
+          create: { name: "endocrinologie" },
+       },
+		{
+          where: { name: "médecine générale" },
+          create: { name: "médecine générale" },
+       }
+      ]
+	}
+},
+{
+        name: "syndrome des ovaires polykystiques",
+        keywords: [
+          "Syndrome", "acné", "hirsustisme", "hyperandrogénie", "spanioménorrhée",
+          "Dysovulation", "fréquent", "diabète", "obésité", "hormonal",
+          "Rotterdam", "exercice", "poids", "échographie", "testostérone", "LH", "FSH",
+		  "Oestradiol", "Prolactine", "follicules", "contraception", "infertilité", "cancer de l'endomètre",
+		  "androgènes", "ovaire", "diabète", "gynécologie", "obstétrique"
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       },
+        {
+          where: { name: "endocrinologie" },
+          create: { name: "endocrinologie" },
+       }
+      ]
+	}
+},
+{
+        name: "Infertilité",
+        keywords: [
+          "Primaire", "secondaire", "masculine", "féminine", "mixte",
+          "azoospermie", "oligospermie", "anovulation", "endométriose", "obstruction",
+          "Idiopathique", "interrogatoire", "grossesse", "enfant", "12 mois",
+		  "échographie", "hystéroscopie", "hystérosalpingographie", "CFA", "AMH", "réserve",
+		  "cryptorchidie", "oreillon", "torsion", "toxiques", "spermogramme", "spermoculture", "caryotype", "gynécologie", "obstétrique"  
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       },
+        {
+          where: { name: "endocrinologie" },
+          create: { name: "endocrinologie" },
+       },
+        {
+          where: { name: "urologie" },
+          create: { name: "urologie" },
+       }
+      ]
+	}
+},
+{
+        name: "Procréation médicalement assistée",
+        keywords: [
+          "Procréation", "infertilité", "don", "grossesse", "réglementation",
+          "Bioéthique", "stimulation", "Clomid", "ovulation", "déclenchement",
+          "Ovitrelle", "insémination", "FIV", "invitro", "masculine",
+		  "féminine", "mixte", "grossesse multiple", "échec", "transfert", "congelé", "frais",
+		  "embryon", "préservation", "gynécologie", "obstétrique"
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       }
+      ]
+	}
+},
+{
+        name: "Infection génitale haute",
+        keywords: [
+          "Douleur", "fièvre", "infection", "infectiologie", "iatrogène","microbiologie", "bactérie",
+          "coïtale", "préservatif", "abcès", "péritonite", "PV",
+          "Gonocoque", "chlamydia", "antibiothérapie", "doxycycline",
+		  "ceftriaxone", "metronidazole", "toucher vaginal", "leucorrhée", "gynécologie", "obstétrique" 
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       },
+        {
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
+{
+        name: "Infection sexuellement transmissible",
+        keywords: [
+          "Gonocoque", "Chlamydia", "Syphilis", "VIH", "Hépatites","microbiologie", "bactérie",
+          "Virus", "préservatif", "rapport sexuel", "infection", "infectiologie", "prophylaxie",
+          "Fièvre", "douleur", "asymptomatique", "antibiotique", "antiviral", "Pénicilline",
+		  "Azithromicine", "ceftriaxone", "leucorrhées", "asymptomatique", "sérologie", "PCR",
+		  "prélèvement vaginal", "TROD", "ulcération", "chancre", "infertilité", "dépistage", "dépister", "recrudescence", "gynécologie", "obstétrique" 
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [		
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       },
+        {
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+       }
+      ]
+	}
+},
+{
+        name: "cancer du col",
+        keywords: [
+          "HPV", "Papillomavirus", "vaccin", "frottis", "dépistage","chronique", "cotisation",
+          "ASC", "LSIL", "HSIL", "cytologie", "histologie", "glandulaire","épidermoïde","dysplasie",
+          "Tabac", "métrorragies", "post coïtales", "métastases", "fortuit",
+		  "masse", "ORL", "hystérectomie", "lugol", "radiothérapie", "palliatif", "curatif", "chimiothérapie",
+		  "curiethérapie", "insitu", "invasive", "gynécologie", "obstétrique"
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       },
+        {
+          where: { name: "oncologie" },
+          create: { name: "oncologie" },
+       }
+      ]
+	}
+},
+{
+        name: "cancer de l'endomètre",
+        keywords: [
+          "Histologie", "Pipelle", "p53", "biopsie", "adénocarcinome","épaississement", "endomètre",
+          "Métrorragies", "post ménopausique", "IRM", "foie", "poumon", "métastases","scanner",
+          "Hystérectomie", "ganglion", "pronostic",
+		  "radiothérapie", "curithérapie", "hormonothérapie", "Tamoxifène", "obésité", "gynécologie", "obstétrique" 
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [		
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       },
+        {
+          where: { name: "oncologie" },
+          create: { name: "oncologie" },
+       }
+      ]
+	}
+},
+{
+        name: "cancer de l'ovaire",
+        keywords: [
+          "O-RAD", "IRM", "coelioscopie", "carcinome", "biopsie","histologie", "cytoréduction",
+          "Débulking", "curage", "lombo-aortique", "carboplatine", "chimiothérapie", "CA125", "ROMA",
+          "Splénectomie", "prophylaxie", "réhabilitation",
+		  "cicatrice", "nulliparité", "Paclitaxel", "Lynch", "Ascite", "cystadénocarcinome", "gynécologie", "obstétrique"
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       },
+        {
+          where: { name: "oncologie" },
+          create: { name: "oncologie" },
+       }
+      ]
+	}
+},
+{
+        name: "cancer du sein",
+        keywords: [
+          "Luminal", "HE2", "basal", "curage","histologie", "biopsie",
+          "Tumorectomie", "mastectomie", "génétique", "BRCA", "radiothérapie", "ganglion","axillaire",
+          "Sentinel", "radiothérapie", "oncogénétique", "Eisinger",
+		  "chimiothérapie", "oestrogène", "alcool", "tabac", "tamoxifène", "immunothérapie",
+		  "trastuzumab", "Herceptin", "récepteur", "lobulaire", "canalaire", "insitu", "invasif", "hyperplasie", "gynécologie", "obstétrique"
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [		
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       },
+        {
+          where: { name: "oncologie" },
+          create: { name: "oncologie" },
+       }
+      ]
+	}
+},
+{
+        name: "Retard de croissance intra utérin",
+        keywords: [
+          "Percentile", "vasculaire", "syndromique", "génétique", "précoce","tardif", "anténatal",
+          "Doppler", "échographie", "croissance", "prématurité", "toxiques", "hypertension","HTA",
+          "Extraction", "déclenchement", "cassure", "EPF", "PC", "PA", "LF", "courbe", "OMS",
+		  "infectieux", "corticoïdes", "Ductus", "RCF", "Intergrowth", "gynécologie", "obstétrique"
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       },
+        {
+          where: { name: "pédiatree" },
+          create: { name: "pediatrie" },
+       }
+      ]
+	}
+},
+{
+        name: "Pré éclampsie",
+        keywords: [
+          "Hypertension", "protéinurie", "épigastrique", "complication", "cytolyse", "thrombopénie", "hémolyse", "placenta", "prématurité", "décès", "RCIU", "éclampsie", "sévère","convulsion",
+          "magnésium", "corticoïdes", "surveillance", "bandelette urinaire",
+		  "dépistage", "insuffisance rénale", "oedèmes", "phosphènes", "acouphènes", "céphalées",
+		  "loden", "Trandate", "gynécologie", "obstétrique"
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       },
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+       }
+      ]
+	}
+},
+{
+        name: "Menace d'accouchement prématuré",
+        keywords: [
+          "Col", "raccourcissement", "hydramnios", "macrosomie",
+		  "idiopathique","multiples", "col", "prématurité", "contractions",
+		  "échographie", "tocolyse", "Nifédipine", "Tractocile", "corticoïdes", "hospitalisation", "gynécologie", "obstétrique" 
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       }
+      ]
+	}
+},
+{
+        name: "Diabète gestationnel",
+        keywords: [
+          "Dépistage", "macrosomie", "hydramnios", "dystocie",
+		  "HGPO", "sucre", "glycémie", "insuline", "régime", "dextro", "surveillance",
+		  "surpoids", "âge","antécédent", "croissance", "équilibre", "gynécologie", "obstétrique"
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       },
+        {
+          where: { name: "endocrinologie" },
+          create: { name: "endocrinologie" },
+       }
+      ]
+	}
+},
+{
+        name: "Rupture prématurée des membranes",
+        keywords: [
+          "Prématurité", "rupture", "infection", "chorioamniotite",
+		  "antibiotiques","prélèvement vaginal", "microbiologie", "ECBU", "déclenchement",
+		  "37", "spontanée", "iatrogène", "surveillance","Streptocoque B", "E.Coli", "clinique",
+		  "IGF1", "écoulement", "clair", "purulent", "gynécologie", "obstétrique"
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+		},
+        {
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+       }
+      ]
+	}
+},
+{
+        name: "cholestase gravidique",
+        keywords: [
+          "Gravidique", "grossesse", "complication", "Amérique",
+		  "foie","prurit", "extrémités", "insomniant", "acides", "biliaires", "jeun", "bile",
+		  "cholurso", "coagulation", "insuffisance hépatique","MFIU", "déclenchement", "sévérité", "cytolyse", "gynécologie", "obstétrique"
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       }
+      ]
+	}
+},
+{
+        name: "Toxoplasmose",
+        keywords: [
+          "Parasite", "chat", "immunité", "sérologie",
+		  "surveillance", "mensuel", "IgG", "IgM", "avidité", "foetopathie",
+		  "alimentation","litière", "liquide amniotique", "amnniocentèse", "Spiramycine",
+		  "Pyrémithamine", "choriorétinite", "fond d'oeil", "séroconversion", "IgM", "Avidité",
+		  "microcéphalie", "séquelles", "séroconversion", "réactivation", "interruption", "IMG", "dépistage ophtalmique", "ETF", "gynécologie", "obstétrique", "parasitologie"
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       },
+        {
+          where: { name: "infectiologie" },
+          create: { name: "infectiologie" },
+    },
+		{
+          where: { name: "pediatrie" },
+          create: { name: "pediatrie" },
+       }
+      ]
+	}
+},
+	  {
+      name: "HSV",
+        keywords: [
+          "enveloppé", "ADN", "simplex", "vésicule", "cutanée",
+          "muqueuse", "sexuelle", "accouchement", "éruption",
+          "méningite", "encéphalite", "méningo-encéphalite", "adénopathies", "oculaire",
+          "infection", "hépatite", "aciclovir", "valaciclovir", "foscarnet",
+          "cutanéo-muqueux", "LCS", "sang", "PCR",
+          "latence", "neurone", "sensitif", "réactivation", "néonatal", "récurrence",
+          "génital", "oral", "virus", "contact", "SNC", "fièvre", "kératite", "uvéite", "rétinite", "nerveux", "virus"
+        ],
+        link:"",  
+		specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+       }
+      ]
+	}
+},
+      {
+        name: "VZV",
+        keywords: [
+          "enveloppé", "ADN", "respiratoire", "lésion", "transplacentaire",
+          "accouchement", "vésicule", "méningite", "encéphalite", "SNC",
+          "oculaire", "congénital", "fièvre", "hépatite", "aciclovir",
+          "valaciclovir", "foscarnet", "vaccin", "vivant", 
+          "attenué", "cutanéo-muqueux", "LCS", "PCR", "varicelle",
+          "zona", "latence", "réactivation", "récurrence",
+          "kératite", "myélite", "oculaire", "post-zostérienne", "douleur", "nerveux", "virus", "virus"
+        ],
+        link: "",
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+       }
+      ]
+	}
+},
+ {
+        name: "CMV",
+        keywords: [
+          "enveloppé", "ADN", "salivaire", "transplantation", "urine",
+          "urinaire", "transplacentaire", "accouchement", "allaitement", "sexuelle",
+          "adénopathies", "fièvre", "hépatite", "SNC", "congénital",
+          "respiratoire", "oculaire", "ganciclovir", "valganciclovir", 
+          "foscarnet", "letermovir", "LCS", "sang", "urine",
+          "salive", "liquide", "amniotique", "PCR", "latence", "réactivation",
+          "sérologie", "IgG", "IgM", "avidité", "immunodéprimés", "séquelles", "surdité", "neurodéveloppement", "foetus", 
+	  "malformation", "primo-infection", "cytomégalovirus", "sérum", "virus", "virus", "larmes", "salive","urines", "surdité",
+		  "asymptomatique", "RCIU", "placenta", "foetopathie", "dépistage","PCR",
+		  "amnniocentèse", "Valaciclovir", "IRM", "hygiène",
+		  "sérologie", "IgG", "IgM", "Avidité", "microcéphalie", "séquelles", "séroconversion", "réactivation", "interruption", "IMG", "gynécologie", "obstétrique"
+        ],
+        link: "",
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+         },
+		  {
+          where: { name: "gynécologie" },
+          create: { name: "gynécologie" },
+       }
+      ]
+	}
+},
+ {
+ name: "EBV",
+        keywords: [
+          "enveloppé", "ADN", "salivaire", "transplantation", "lymphocytes B",
+          "oncogène", "lymphome", "carcinome", "nasopharyngé",
+          "adénopathies", "fièvre", "hépatite", "respiratoire", "sang", "sérum",
+          "IgG", "IgM", "VCA", "EBNA", "Epstein-Barr", 
+          "latence", "réactivation", "mononucléose", "mononucléosique",
+          "salive", "syndrome", "PCR",
+          "sérologie", "immunodéprimés", "primo-infection", "virus", "virus"
+        ],
+        link: "",
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+       }
+      ]
+	}
+},
+ {
+ name: "HPV",
+        keywords: [
+          "Nu", "ADN", "lésions", "cutanéo-muqueux", "sexuelle",
+          "contact", "éruption", "cutané", "muqueux",
+          "oncogène", "cancer", "col", "utérus", "anal", "anus",
+          "tumeur", "aérodigestives", "oropharyngé", "vaccin", "lésion", 
+          "condylome", "PCR", "génotype", "utérin",
+          "acuminé", "vaccination", "sexuel", "virus", "HSH", "virus"
+        ],
+        link: "",
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+       }
+      ]
+	}
+},
+ {
+ name: "VHA",
+        keywords: [
+          "Nu", "ARN", "VHA", "hépatite", "A",
+          "fécal", "oral", "cutané", "féco-oral",
+          "alimentaire", "manuportée", "vaccin", "sang", "sérologie", "IgM",
+          "aïgue", "fulminante", "voyage", "endémie", "zone", "cas", "contact", 
+	  "hépatopathie", "virus", "virus"
+        ],
+        link: "",
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+       }
+      ]
+	}
+},
+ {
+ name: "VHB",
+        keywords: [
+          "Enveloppé", "ADN","hépatite", "B", "parentérale", "toxicomanie", "AES", "accident", "exposition", "sang",
+          "sexuelle", "accouchement", "allaitement", "oncogène", "carcinome", "hépatocellulaire", "transfusion",
+          "sang", "sérologie", "HBs", "HBc", "PCR", "charge", "virale", "chronique", "vaccin", "hépatocyte", "réactivation", "delta",
+          "HDV", "immunodépression", "monothérapie", "ténofovir", "entécavir", "polymérase", "cancer", "IgG", "IgM",
+	  "nucléotidique", "virus", "nucléosidique", "inhibiteur", "cccDNA", "super-enroulé", "hépatique", "traitement", "analogue", "virus"
+	  ],
+        link: "",
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+       }
+      ]
+	}
+},
+ {
+ name: "VHC",
+        keywords: [
+          "Enveloppé", "ARN","hépatite", "C", "parentérale", "toxicomanie", "AES", "accident", "exposition", "sang", "carcinome", "hépatocellulaire",
+          "oncogène", "sang", "sérologie","PCR", "charge", "virale", "chronique", "hépatocyte", "réinfection",
+          "immunodépression", "polymérase", "association", "antiviraux", "protéase", "génotype", "transfusion",
+	  "virus", "inhibiteur", "cccDNA", "AAD", "guérison", "cryoglobulinémie", "hépatique", "traitement", "cancer", "analogue", "virus"
+	  ],
+        link: "",
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+       }
+      ]
+	}
+},
+{
+ name: "VHE",
+        keywords: [
+          "Nu", "ARN","hépatite", "E", "fécal", "oral", "féco-oral", "transplacenaire", "génotype", "alimentaire", "porc", "gibier",
+          "manuportée", "parentérale", "transfusion","transplantation", "oncogène", "cancer", "chronique", "aiguë", "carcinome", "hépatocellulaire",
+          "SNC", "méningite", "antivirale", "monothérapie", "virus", "nucléosidique", "inhibiteur",
+	  "polymérase", "analogue", "cccDNA", "AAD", "guérison", "cryoglobulinémie", "hépatique", "traitement", "sang", "selles", "PCR",
+	  "sérologie", "IgG", "IgM", "immunodéprimés", "hépatopathie", "endémie", "zone", "hydrique", "eau", "virus"
+	  ],
+        link: "",
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+       }
+      ]
+	}
+},
+{
+ name: "VIH",
+        keywords: [
+          "Enveloppé", "ARN", "sexuelle", "parentérale", "AES", "accident", "exposition", "sang", "toxicomanie", "accouchement", "allaitement",
+	  "lymphocyte", "T", "lymphocyte T", "CD4", "éruption", "fièvre", "adénopathies", "douleurs", "articulaires", "musculaire", "myalgies", "pseudo-grippal", "arthralgies",
+          "association", "antiviraux", "nucléosidique","transcriptase", "inverse", "rétro-transcription", "protéase", "inhibiteur", "intégrase", "sang",
+          "SNC", "méningite", "antivirale", "virus", "sérologie", "charge", "virale", "ELISA", "western blot", "p24", "indétectable", "immunodéprimés", "immunodéficience",
+		  "polymérase", "analogue", "traitement", "virus"
+	  ],
+        link: "",
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+       }
+      ]
+	}
+},
+{
+ name: "rotavirus",
+        keywords: [
+          "Nu", "ARN", "segmenté", "fécal", "oral", "féco-oral", "gastro-entérite", "gastro", "entérite", "vaccin", "selles",
+	  "PCR", "test", "antigénique", "déshydratation", "fièvre", "douleurs", "enfants", "pediatrie", "enfance", "nourrisson", "nouveau-né", "soluté", "SRO", 
+	  "réhydratation", "orale", "réinfection", "génotype", "virus"
+	  ],
+        link: "",
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+       }
+      ]
+	}
+},
+{
+ name: "norovirus",
+        keywords: [
+          "Nu", "ARN", "fécal", "oral", "féco-oral", "gastro-entérite", "gastro", "entérite", "selles",
+	  "PCR", "test", "antigénique", "déshydratation", "fièvre", "douleurs", "réinfection", "TIAC", "toxi-infection", "gériatrie", "adulte", "SRO", 
+	  "réhydratation", "orale", "hydratation", "génotype", "virus"
+	  ],
+        link: "",
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+       }
+      ]
+	}
+},
+{
+ name: "entérovirus",
+        keywords: [
+          "Nu", "ARN", "fécal", "oral", "féco-oral", "respiratoire", "manuportée", "éruption", "cutanée", "cutanéo-muqueuse", "infection", "SNC", "méningite", "système", "nerveux", "encéphalite",
+	  "cardiopathie", "infection", "conjonctivite", "oculaire", "polio", "poliomyélite", "vaccin", "selles", "gorge", "LCS", "sang", "PCR", "paralysie", "flasque", "poliomyélite", "rhombencéphalite",
+	  "coxsackievirus", "pieds", "main", "bouche", "conjonctivite", "rhinite", "rhinopharyngite", "virus"
+	  ],
+        link: "",
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+       }
+      ]
+	}
+},
+{
+ name: "coronavirus",
+        keywords: [
+          "enveloppé", "ARN", "respiratoire", "manuportée", "fièvre", "grippe", "gastro", "entérite", "infection", "adénopathies", "douleurs", "articulaires", "musculaire", "myalgie", "pseudo-grippal", 
+          "monothérapie", "anticorps", "monoclonaux", "monoclonal", "inhibiteur", "protéase", "vaccin", "SARS", "COVID", "sars-cov-2", "PCR", "respiratoire", "MERS", "sars-cov-1", "arthralgies",
+	  "endémique", "mutation", "recombinaison", "rhinite", "rhinopharyngite", "défaillance", "détresse", "aiguë", "SDRA", "émergent", "zoonose", "sévère",  "antigénique", "test", "épidémie", "pandémie", "virus"
+	  ],
+        link: "",
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+       }
+      ]
+	}
+},
+{
+ name: "virus influenza",
+        keywords: [
+          "enveloppé", "ARN", "respiratoire", "manuportée", "segmenté", "fièvre", "grippe", "infection", "douleurs", "articulaires", "musculaire", "myalgie", "grippal", "syndrome", "arthralgies",
+          "neuraminidase", "monothérapie", "vaccin", "inhibiteur", "défaillance", "détresse", "aiguë", "SDRA", "émergent", "zoonose", "sévère", "mutation", "ponctuelle", "réassortiements", "cassure",
+	  "dérive", "glissement", "antigénique", "PCR", "test", "segment", "épidémie", "pandémie", "A", "B", "oiseaux", "porc", "humain", "hôte", "virus"	
+],	  
+        link: "",
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+       }
+      ]
+	}
+},
+{
+ name: "VRS",
+        keywords: [
+          "enveloppé", "ARN", "respiratoire", "manuportée", "fièvre", "infection", "douleurs", "articulaires", "musculaire", "myalgie", "bronchiolite", "syndrome", "arthralgies",
+          "monothérapie", "vaccin", "nirsevimab", "défaillance", "détresse", "aiguë", "SDRA", "sévère", "mutation", "ponctuelle", "antigénique", "PCR", "test", "épidémie", "nourrissons",
+	  "nouveau-né", "virus", "anticorps", "monoclonaux",  "surinfection", "insuffisance", "apnée", "atélectasie", "pediatrie", "virus"
+	  ],	  
+        link: "",
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+       }
+      ]
+	}
+},
+{
+ name: "rougeole",
+        keywords: [
+          "enveloppé", "ARN", "respiratoire", "fièvre", "infection", "système", "nerveux", "adénopathies", "fièvre", "éruption", "cutanée", "maculopapuleux", "maculopapuleuse", "macule", "papule", "exanthème",
+          "vaccin", "ROR", "vivant", "atténué", "sang", "salive", "PCR", "urine", "respiratoire", "LCS", "IgM", "IgG", "sérum", "sérologie", "catarrhe", "oculo-nasal", "contagieux", "arthralgies",
+	  "Köplik", "encéphalite", "PESS", "sclérosante",  "subaiguë", "pan-encéphalite"
+	  ],	  
+        link: "",
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+       }
+      ]
+	}
+},
+{
+ name: "rubéole",
+        keywords: [
+          "enveloppé", "ARN", "respiratoire", "transplacentaire", "infection", "congénital", "adénopathies", "fièvre", "éruption", "cutanée", "maculopapuleux", "maculopapuleuse", "macule", "papule", "exanthème", "douleurs", 
+	  "articulaires", "musculaire", "myalgie", "arthralgies", "vaccin", "ROR", "vivant", "atténué", "sang", "salive", "PCR", "IgM", "IgG", "sérum", "sérologie", "amniotique", "liquide", "urine", "sang", "sérum", 
+	  "salive",  "surdité"
+	  ],
+        link: "",
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+       }
+      ]
+	}
+},
+{
+ name: "dengue",
+        keywords: [
+          "enveloppé", "ARN", "vectorielle", "vectoriel", "infection", "moustique", "gastro-entérite", "fièvre", "éruption", "cutanée", "adénopathies", "hémorragique", "exanthème", "douleurs", 
+	  "articulaires", "musculaire", "myalgie", "arthralgies", "vaccin", "sang", "salive", "PCR", "IgM", "IgG", "sérum", "sérologie", "arthropode", "arbovirus", "aedes", "albopictus", "sérotype", "aegypti"
+	  ],
+        link: "",
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+       }
+      ]
+	}
+},
+{
+ name: "Parvovirus B19",
+        keywords: [
+          "nu", "ADN", "respiratoire", "transplacentaire", "infection", "transfusion", "fièvre", "éruption", "cutanée", "exanthème", "douleurs", "adénopathies",
+	  "articulaires", "musculaire", "myalgie", "arthralgies", "anémie", "sang", "moelle", "osseuse", "IgM", "IgG", "sérum", "sérologie", "cardiopathie", "congénital", "liquide", "amniotique", "PCR", "sérologie",
+	  "IgG", "IgM", "mégalérythème", "épidémique", "macule", "papule", "paire", "claque", "maculopapuleux", "anasarque", "MFIU", "mort", "foetale", "in-utero", "drépanocytose", "hémoglobinopathie", "thalassémie"
+	  ],
+        link: "",
+        specialties: {
+      connectOrCreate: [
+        {
+          where: { name: "microbiologie" },
+          create: { name: "microbiologie" },
+       }
+      ]
+	}
+	}
  ];
   // Insérez les données en utilisant skipDuplicates pour éviter les erreurs si des doublons existent
   await prisma.disease.createMany({

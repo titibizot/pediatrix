@@ -255,7 +255,7 @@ export default function Game() {
               Page d'accueil
             </Link>
             {isChallenge && (
-              <Link href="/Pediatrix/game?mode=libre" className="text-sm font-medium text-gray-500 hover:text-gray-700">
+              <Link href="/Obstetrix/game?mode=libre" className="text-sm font-medium text-gray-500 hover:text-gray-700">
                 Jeu libre
               </Link>
             )}
@@ -308,7 +308,7 @@ export default function Game() {
       {/* Bannière photo */}
       <div
         className="w-full h-64 relative bg-cover bg-center"
-        style={{ backgroundImage: "url('/your-image-path.jpeg')", backgroundPosition: "50% 30%" }}
+        style={{ backgroundImage: "url('/banniereobstetrix.jpg')", backgroundPosition: "50% 30%" }}
       >
         <div className="absolute inset-0 bg-black opacity-50"></div>
         <h1 className="relative text-4xl md:text-5xl font-bold text-white text-center pt-20">

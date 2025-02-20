@@ -5,7 +5,7 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "windows"]
 }
 
@@ -19,12 +19,18 @@ model User {
 }
 
 model Disease {
-  id        String    @id @default(uuid())
-  name      String    @unique
-  keywords  String[]  // Tableau de mots clés associés à la maladie
-  keywordsembedding Json?     // Stocke l'embedding (généré à partir des mots clés)
-  link      String    // Lien vers le chapitre du référentiel
-  specialty String    // Ex : "pediatrie", "obstetrique", etc.
+  id                 String      @id @default(uuid())
+  name               String      @unique
+  keywords           String[]    // Tableau de mots clés associés à la maladie
+  keywordsembedding  Json?       // Stocke l'embedding (généré à partir des mots clés)
+  link               String?     // Lien vers le chapitre du référentiel
+  specialties        Specialty[] @relation("DiseaseSpecialties")
+}
+
+model Specialty {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  diseases Disease[] @relation("DiseaseSpecialties")
 }
 
 model GameSession {
