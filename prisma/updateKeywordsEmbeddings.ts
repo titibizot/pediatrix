@@ -27,7 +27,7 @@ async function updateKeywordsEmbeddingForDisease(disease: { id: string; name: st
     
     await prisma.disease.update({
       where: { id: disease.id },
-      data: { keywordsembedding: embeddings }  // Mise à jour de la propriété "keywordsembedding"
+      data: { keywordsembedding: embeddings }
     });
     console.log(`Keywords embeddings mis à jour pour ${disease.name}`);
   } catch (error: any) {
@@ -37,12 +37,11 @@ async function updateKeywordsEmbeddingForDisease(disease: { id: string; name: st
 
 async function main() {
   try {
-    const diseases = await prisma.disease.findMany({
-      where: { specialties: { some: { name: "pediatrie" } } }
-    });
+    // On récupère toutes les maladies, sans filtrer par spécialité
+    const diseases = await prisma.disease.findMany({});
 
     if (diseases.length === 0) {
-      console.log("Aucune maladie trouvée pour la spécialité pediatrie.");
+      console.log("Aucune maladie trouvée.");
       return;
     }
 
