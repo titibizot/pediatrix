@@ -28,7 +28,7 @@ export default function Game() {
 
     if (isChallenge) {
       const today = new Date().toISOString().split("T")[0];
-      const saved = localStorage.getItem("challengeCompleted_gynecologie");
+      const saved = localStorage.getItem("challengeCompleted_gynécologie");
       if (saved === today) {
         setFrozen(true);
         setFeedback("Vous avez déjà trouvé la réponse aujourd'hui. Attendez le renouvellement à minuit.");
@@ -50,7 +50,7 @@ export default function Game() {
     if (isChallenge) {
       setLoading(true);
       axios
-        .get("/api/dailyDisease?specialty=gynecologie")
+        .get("/api/dailyDisease?specialty=gynécologie")
         .then((res) => {
           setDailyDisease(res.data);
           setLoading(false);
@@ -67,7 +67,7 @@ export default function Game() {
     if (isLibre) {
       setLoading(true);
       axios
-        .get("/api/randomDisease?specialty=gynecologie")
+        .get("/api/randomDisease?specialty=gynécologie")
         .then((res) => {
           setCurrentDisease(res.data);
           setLoading(false);
@@ -195,7 +195,7 @@ export default function Game() {
       });
 
     const today = new Date().toISOString().split("T")[0];
-    localStorage.setItem("challengeCompleted_gynecologie", today);
+    localStorage.setItem("challengeCompleted_gynécologie", today);
     setFrozen(true);
   }
     } else {
@@ -222,7 +222,7 @@ export default function Game() {
   // Bouton Nouvelle Partie (mode Libre)
   const handleNewGame = () => {
     axios
-      .get("/api/randomDisease?specialty=gynecologie")
+      .get("/api/randomDisease?specialty=gynécologie")
       .then((res) => {
         setCurrentDisease(res.data);
         setKeywordsHistory([]);

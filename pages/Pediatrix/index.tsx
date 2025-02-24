@@ -32,10 +32,10 @@ export default function Home() {
               <Link href="/Pediatrix" legacyBehavior>
                 <a className="flex items-center cursor-pointer">
                   <Image
-                    src="/logo.jpg"
+                    src="/logopediatrix.jpg"
                     alt="Logo Pediatrix"
-                    width={160}
-                    height={160}
+                    width={60}
+                    height={60}
                     className="object-cover rounded-full"
                   />
                   <span className="ml-2 text-3xl font-bold text-blue-500">

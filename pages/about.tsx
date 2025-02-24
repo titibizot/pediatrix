@@ -94,7 +94,7 @@ export default function About() {
             <ul className="list-disc list-inside mb-4 text-gray-700">
               <li><strong>Etienne Bizot</strong> – Pédiatre</li>
               <li><strong>Vincent Portet-Sulla</strong> – Virologue</li>
-              <li><strong>Stanley Soussan</strong> – Interne en obstétrique</li>
+              <li><strong>Stanley Soussan</strong> – Obstétricien</li>
             </ul>
             <p className="text-gray-700">
               Notre objectif est de rendre l'apprentissage des connaissances médicales accessible, amusant et stimulant. Merci de jouer et de nous accompagner dans cette aventure !

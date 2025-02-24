@@ -28,7 +28,7 @@ export default function Game() {
 
     if (isChallenge) {
       const today = new Date().toISOString().split("T")[0];
-      const saved = localStorage.getItem("challengeCompleted");
+      const saved = localStorage.getItem("challengeCompleted_general");
       if (saved === today) {
         setFrozen(true);
         setFeedback("Vous avez déjà trouvé la réponse aujourd'hui. Attendez le renouvellement à minuit.");
@@ -182,7 +182,7 @@ export default function Game() {
       setCorrect(true);
       if (isChallenge) {
         const today = new Date().toISOString().split("T")[0];
-        localStorage.setItem("challengeCompleted", today);
+        localStorage.setItem("challengeCompleted_general", today);
         setFrozen(true);
       }
     } else {
