@@ -25,8 +25,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   });
   
   const mailOptions = {
-    from: `"Medixgame Contact" <${process.env.EMAIL_USER}>`,
-    to: "etienne.bizot@aphp.fr", // Adresse de destination
+    from: `"Diagnostix" <${process.env.EMAIL_USER}>`,
+    to: "diagnostixgame@gmail.com", // Adresse de destination
     subject: `Nouveau message de ${name}`,
     text: `Nom: ${name}\nEmail: ${email}\nMessage:\n${message}`,
   };

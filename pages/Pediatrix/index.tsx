@@ -3,6 +3,9 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import axios from "axios";
 import Image from "next/image";
+import Background from "../../components/Background";
+import Banner from "../../components/Banner";
+import Footer from "../../components/Footer";
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -19,20 +22,14 @@ export default function Home() {
   }, []);
 
   return (
-    <div
-      className="relative min-h-screen bg-cover bg-center"
-      style={{
-        backgroundImage: "url('/fondpediatrix.jpeg')",
-        backgroundSize: "110%", // Dézoomé pour voir toute l'image
-      }}
-    >
-      {/* Contenu principal placé au-dessus du fond */}
-      <div className="relative z-30">
+    <Background backgroundImage="/fondpediatrix.jpeg" style={{ backgroundSize: "110%" }}>
+      {/* Conteneur global en flex pour répartir verticalement */}
+      <div className="relative z-30 min-h-screen flex flex-col">
         {/* Barre de navigation */}
         <nav className="bg-white shadow-md">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-20">
             <div className="flex items-center space-x-4">
-              <Link href="/" legacyBehavior>
+              <Link href="/Pediatrix" legacyBehavior>
                 <a className="flex items-center cursor-pointer">
                   <Image
                     src="/logo.jpg"
@@ -41,24 +38,31 @@ export default function Home() {
                     height={160}
                     className="object-cover rounded-full"
                   />
-                  <span className="ml-2 text-3xl font-bold text-blue-700">
+                  <span className="ml-2 text-3xl font-bold text-blue-500">
                     Pediatrix
                   </span>
                 </a>
               </Link>
             </div>
-            <div className="flex space-x-8">
+            {/* Liens de navigation pour desktop */}
+            <div className="hidden sm:flex space-x-8">
+              <Link href="/" legacyBehavior>
+                <a className="text-sm font-medium text-blue-500 hover:text-blue-300">
+                  Page d'accueil
+                </a>
+              </Link>
               <Link href="/Pediatrix/game?mode=challenge" legacyBehavior>
-                <a className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:border-blue-500 hover:text-blue-700">
+                <a className="text-sm font-medium text-blue-500 hover:text-blue-300">
                   Mode Challenge
                 </a>
               </Link>
               <Link href="/Pediatrix/game?mode=libre" legacyBehavior>
-                <a className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:border-green-500 hover:text-green-700">
+                <a className="text-sm font-medium text-blue-500 hover:text-blue-300">
                   Mode Libre
                 </a>
               </Link>
             </div>
+            {/* Bouton menu mobile */}
             <div className="flex items-center sm:hidden ml-4">
               <button
                 type="button"
@@ -67,34 +71,12 @@ export default function Home() {
               >
                 <span className="sr-only">Ouvrir le menu</span>
                 {mobileMenuOpen ? (
-                  <svg
-                    className="block h-6 w-6"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
+                  <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 ) : (
-                  <svg
-                    className="block h-6 w-6"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
+                  <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
                 )}
               </button>
@@ -103,6 +85,11 @@ export default function Home() {
           {mobileMenuOpen && (
             <div className="sm:hidden">
               <div className="pt-2 pb-3 space-y-1">
+                <Link href="/Pediatrix" legacyBehavior>
+                  <a className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-500 hover:text-gray-800">
+                    Page d'accueil
+                  </a>
+                </Link>
                 <Link href="/Pediatrix/game?mode=challenge" legacyBehavior>
                   <a className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-blue-500 hover:text-blue-700">
                     Mode Challenge
@@ -116,54 +103,42 @@ export default function Home() {
               </div>
             </div>
           )}
-        </nav>
+		   </nav>
 
-        {/* Header principal */}
-        <header className="relative h-64 flex justify-center items-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-blue-500 text-center z-40">
-            Bienvenue sur Pediatrix
-          </h1>
-        </header>
+          {/* Ajout du composant Banner */}
+          <Banner title="Bienvenue sur Pediatrix" />
+       
 
-        {/* Conteneur central avec fond de logo */}
-        <div className="relative flex justify-center mt-8">
-          <div className="relative max-w-2xl w-full bg-white shadow-md rounded-lg p-6 text-center">
+        {/* Zone centrale : flex-grow pour occuper l'espace restant et centrer le contenu */}
+        <main className="flex-grow flex items-center justify-center">
+          <div className="max-w-2xl w-full bg-white shadow-md rounded-lg p-6 text-center">
             <p className="mb-4 text-gray-700">
               Ce jeu, inspiré de{" "}
               <Link href="https://cemantix.certitudes.org/" legacyBehavior>
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline text-blue-600 hover:text-blue-800"
-                >
+                <a target="_blank" rel="noopener noreferrer" className="underline text-blue-600 hover:text-blue-800">
                   Cemantix
                 </a>
               </Link>
-              , met à l’épreuve vos connaissances en pédiatrie tout en vous offrant une expérience ludique et stimulante.
-              Il est inspiré du{" "}
+              , met à l’épreuve vos connaissances en pédiatrie de façon ludique et stimulante.
+              Il s'inspire du{" "}
               <Link href="https://www.pedia-univ.fr/deuxieme-cycle/referentiel/prefaces" legacyBehavior>
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline text-blue-600 hover:text-blue-800"
-                >
+                <a target="_blank" rel="noopener noreferrer" className="underline text-blue-600 hover:text-blue-800">
                   référentiel de pédiatrie
                 </a>
               </Link>
               .
             </p>
-            <ul className="mb-4 list-disc list-inside mx-auto text-left">
+            <ul className="mb-4 list-disc list-inside text-gray-700 text-left mx-auto">
               <li>
-                <strong>Challenge</strong> : Chaque jour, relevez le défi en identifiant une unique maladie. Soyez le premier parmi vos amis à trouver la réponse !
+                <strong>Challenge</strong> : Relevez le défi quotidien en identifiant une maladie unique.
               </li>
               <li>
-                <strong>Libre</strong> : Lancez autant de parties que vous le souhaitez. Un chronomètre est présent pour limiter le temps de jeu.
+                <strong>Libre</strong> : Lancez autant de parties que vous le souhaitez avec un chronomètre pour limiter le temps.
               </li>
             </ul>
             <p className="mb-4 text-gray-700">
-              Dans les deux modes, votre objectif est de deviner une maladie pédiatrique référencée dans notre base de données.
-              Pour vous guider, saisissez des mots-clés (ex. : toux, éruption, nephrologie…) qui s’illuminent en fonction de leur proximité avec la réponse.
-              À vous de jouer !
+              Dans les deux modes, votre objectif est de deviner une maladie pédiatrique référencée dans notre base.
+              Saisissez des mots-clés pour voir leur proximité avec la réponse. À vous de jouer !
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
               <Link href="/Pediatrix/game?mode=challenge" legacyBehavior>
@@ -184,37 +159,11 @@ export default function Home() {
               </p>
             </div>
           </div>
-        </div>
-
-        {/* Footer */}
-        <footer className="bg-white py-8">
-          <div className="max-w-5xl mx-auto px-4 text-center">
-            <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-8">
-              <Link href="/contact" legacyBehavior>
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-medium text-blue-700 hover:underline"
-                >
-                  Formulaire de Contact
-                </a>
-              </Link>
-              <Link href="/about" legacyBehavior>
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-medium text-blue-700 hover:underline"
-                >
-                  Qui sommes-nous ?
-                </a>
-              </Link>
-            </div>
-            <p className="mt-4 text-gray-400 text-xs">
-              © {new Date().getFullYear()} Diagnostix. Tous droits réservés.
-            </p>
-          </div>
-        </footer>
+        </main>
       </div>
-    </div>
+
+      {/* Footer commun */}
+      <Footer />
+    </Background>
   );
 }

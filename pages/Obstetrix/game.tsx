@@ -1,8 +1,11 @@
+// pages/Obstetrix/game.js
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
 import Link from "next/link";
 import Image from "next/image";
+import Background from "../../components/Background"; // Ajuste le chemin selon ta structure
+import Footer from "../../components/Footer";
 
 export default function Game() {
   const router = useRouter();
@@ -25,7 +28,7 @@ export default function Game() {
 
     if (isChallenge) {
       const today = new Date().toISOString().split("T")[0];
-      const saved = localStorage.getItem("challengeCompleted");
+      const saved = localStorage.getItem("challengeCompleted_gynecologie");
       if (saved === today) {
         setFrozen(true);
         setFeedback("Vous avez déjà trouvé la réponse aujourd'hui. Attendez le renouvellement à minuit.");
@@ -47,7 +50,7 @@ export default function Game() {
     if (isChallenge) {
       setLoading(true);
       axios
-        .get("/api/dailyDisease?=specialty=gynécologie")
+        .get("/api/dailyDisease?specialty=gynecologie")
         .then((res) => {
           setDailyDisease(res.data);
           setLoading(false);
@@ -64,7 +67,7 @@ export default function Game() {
     if (isLibre) {
       setLoading(true);
       axios
-        .get("/api/randomDisease?=specialty=gynécologie")
+        .get("/api/randomDisease?specialty=gynecologie")
         .then((res) => {
           setCurrentDisease(res.data);
           setLoading(false);
@@ -125,7 +128,7 @@ export default function Game() {
   }, [timeLeft, timerActive]);
 
   // Fonction de mélange Fisher-Yates
-  const shuffleArray = (array: any[]) => {
+  const shuffleArray = (array) => {
     let currentIndex = array.length, randomIndex;
     while (currentIndex !== 0) {
       randomIndex = Math.floor(Math.random() * currentIndex);
@@ -178,27 +181,37 @@ export default function Game() {
       );
       setCorrect(true);
       if (isChallenge) {
-        const today = new Date().toISOString().split("T")[0];
-        localStorage.setItem("challengeCompleted", today);
-        setFrozen(true);
-      }
+  console.log("targetDisease:", targetDisease);
+  axios.post("/api/recordChallenge", {
+    mode: "challenge",
+    success: true,
+    diseaseId: diseaseData ? diseaseData.name : "inconnu"
+  })
+  .then((res) => {
+    console.log("Session enregistrée :", res.data);
+  })
+      .catch((error) => {
+        console.error("Erreur lors de l'enregistrement de la session :", error);
+      });
+
+    const today = new Date().toISOString().split("T")[0];
+    localStorage.setItem("challengeCompleted_gynecologie", today);
+    setFrozen(true);
+  }
     } else {
       setFeedback("Ce n'est pas la bonne réponse. Réessayez !");
     }
     setAnswerInput("");
   };
 
-  // Bouton Indice (mode Libre) : sélectionne exactement 2 mots-clés de la base (ceux avec correspondance 1.0)
+  // Bouton Indice (mode Libre)
   const handleHint = () => {
-  if (!targetKeywords || targetKeywords.length === 0) return;
-  // On sélectionne aléatoirement 2 mots parmi targetKeywords
-  const shuffled = shuffleArray([...targetKeywords]);
-  const selectedHints = shuffled.slice(0, 2);
-  setHints(selectedHints);
-  // Optionnel : mettre à jour aussi le feedback avec ces indices
-  setFeedback(`Indices : ${selectedHints.join(", ")}`);
-};
-
+    if (!targetKeywords || targetKeywords.length === 0) return;
+    const shuffled = shuffleArray([...targetKeywords]);
+    const selectedHints = shuffled.slice(0, 2);
+    setHints(selectedHints);
+    setFeedback(`Indices : ${selectedHints.join(", ")}`);
+  };
 
   // Bouton Réponse (mode Libre)
   const handleShowAnswer = () => {
@@ -209,7 +222,7 @@ export default function Game() {
   // Bouton Nouvelle Partie (mode Libre)
   const handleNewGame = () => {
     axios
-      .get("/api/randomDisease?=specialty=gynécologie")
+      .get("/api/randomDisease?specialty=gynecologie")
       .then((res) => {
         setCurrentDisease(res.data);
         setKeywordsHistory([]);
@@ -228,251 +241,253 @@ export default function Game() {
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
-  // Tri des mots-clés soumis par ordre de couleur : verts en haut, puis oranges, puis rouges
+  // Tri des mots-clés soumis par ordre de couleur
   const sortedKeywordsHistory = [...keywordsHistory].sort((a, b) => {
     const order = { darkgreen: 1, green: 1, orange: 2, red: 3 };
     return (order[a.color] || 4) - (order[b.color] || 4);
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
-      {/* Barre de navigation */}
-      <nav className="bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-          <div className="flex items-center space-x-3">
-            {/* Logo agrandi et zoomé */}
-            <Image
-              src="/logo.jpeg"
-              alt="Logo Pédiatrix"
-              width={160}
-              height={160}
-              className="object-cover rounded-full"
-            />
-            <span className="text-2xl font-bold text-blue-700">Pédiatrix</span>
-          </div>
-          <div className="flex space-x-8">
-            <Link href="/" className="text-sm font-medium text-gray-500 hover:text-gray-700">
-              Page d'accueil
-            </Link>
-            {isChallenge && (
-              <Link href="/Obstetrix/game?mode=libre" className="text-sm font-medium text-gray-500 hover:text-gray-700">
-                Jeu libre
-              </Link>
-            )}
-            {isLibre && (
-              <Link href="/Pediatrix/game?mode=challenge" className="text-sm font-medium text-gray-500 hover:text-gray-700">
-                Challenge
-              </Link>
-            )}
-          </div>
-          <div className="sm:hidden ml-4">
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-            >
-              <span className="sr-only">Ouvrir le menu</span>
-              {mobileMenuOpen ? (
-                <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              ) : (
-                <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              )}
-            </button>
-          </div>
-        </div>
-        {mobileMenuOpen && (
-          <div className="sm:hidden">
-            <div className="pt-2 pb-3 space-y-1">
-              <Link href="/" className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-500 hover:text-gray-800">
-                Page d'accueil
+    <Background backgroundImage="/fondobstetrix.jpg">
+      <div className="relative z-30 min-h-screen flex flex-col">
+        {/* Barre de navigation */}
+        <nav className="bg-white shadow-md">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+            <div className="flex items-center space-x-3">
+              <Image
+                src="/logoObstetrix.jpg"
+                alt="Logo Pédiatrix"
+                width={160}
+                height={160}
+                className="object-cover rounded-full"
+              />
+              <span className="text-2xl font-bold text-blue-700">Pédiatrix</span>
+            </div>
+            {/* Liens de navigation pour desktop */}
+            <div className="hidden sm:flex space-x-8">
+              <Link href="/Obstetrix" legacyBehavior>
+                <a className="text-sm font-medium text-gray-500 hover:text-gray-700">
+                  Page d'accueil
+                </a>
               </Link>
               {isChallenge && (
-                <Link href="/Pediatrix/game?mode=libre" className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-green-500 hover:text-green-700">
-                  Jeu libre
+                <Link href="/Obstetrix/game?mode=libre" legacyBehavior>
+                  <a className="text-sm font-medium text-gray-500 hover:text-gray-700">
+                    Jeu libre
+                  </a>
                 </Link>
               )}
               {isLibre && (
-                <Link href="/Pediatrix//game?mode=challenge" className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-blue-500 hover:text-blue-700">
-                  Challenge
+                <Link href="/Obstetrix/game?mode=challenge" legacyBehavior>
+                  <a className="text-sm font-medium text-gray-500 hover:text-gray-700">
+                    Challenge
+                  </a>
                 </Link>
               )}
             </div>
+            {/* Bouton menu mobile */}
+            <div className="flex items-center sm:hidden ml-4">
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+              >
+                <span className="sr-only">Ouvrir le menu</span>
+                {mobileMenuOpen ? (
+                  <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
-        )}
-      </nav>
-
-      {/* Bannière photo */}
-      <div
-        className="w-full h-64 relative bg-cover bg-center"
-        style={{ backgroundImage: "url('/banniereobstetrix.jpg')", backgroundPosition: "50% 30%" }}
-      >
-        <div className="absolute inset-0 bg-black opacity-50"></div>
-        <h1 className="relative text-4xl md:text-5xl font-bold text-white text-center pt-20">
-          {isChallenge ? "Challenge" : isLibre ? "Jeu libre" : "Bienvenue"}
-        </h1>
-      </div>
-
-      {/* Contenu principal */}
-      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden my-6 p-6">
-        <main>
-          {isLibre && (
-            <div className="mb-6 flex flex-col sm:flex-row items-center justify-between">
-              <div>
-                <label className="mr-2 font-medium text-gray-700">Durée de jeu :</label>
-                <select
-                  value={duration}
-                  onChange={(e) => setDuration(parseInt(e.target.value))}
-                  className="border p-1 rounded"
-                >
-                  <option value={0}>Choisir...</option>
-                  <option value={5}>5 minutes</option>
-                  <option value={10}>10 minutes</option>
-                  <option value={20}>20 minutes</option>
-                  <option value={30}>30 minutes</option>
-                </select>
+          {mobileMenuOpen && (
+            <div className="sm:hidden">
+              <div className="pt-2 pb-3 space-y-1">
+                <Link href="/Obstetrix" legacyBehavior>
+                  <a className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-500 hover:text-gray-800">
+                    Page d'accueil
+                  </a>
+                </Link>
+                {isChallenge && (
+                  <Link href="/Obstetrix/game?mode=libre" legacyBehavior>
+                    <a className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-green-500 hover:text-green-700">
+                      Jeu libre
+                    </a>
+                  </Link>
+                )}
+                {isLibre && (
+                  <Link href="/Obstetrix/game?mode=challenge" legacyBehavior>
+                    <a className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-blue-500 hover:text-blue-700">
+                      Challenge
+                    </a>
+                  </Link>
+                )}
               </div>
-              {timerActive && (
-                <div className="mt-4 sm:mt-0">
-                  <span className="font-medium text-gray-700">Temps restant :</span>{" "}
-                  <strong className="text-indigo-600">{formatTime(timeLeft)}</strong>
-                </div>
-              )}
             </div>
           )}
+        </nav>
 
-          <div className="mb-4">
-            <p className="text-sm text-gray-700">
-              La maladie contient : <strong>{diseaseWordCount} mot(s)</strong>
-            </p>
-          </div>
-
-          {/* Affichage des formulaires interactifs si la page n'est pas figée */}
-          {!frozen ? (
-            <>
-              {/* Formulaire de saisie d'un mot-clé */}
-              <form onSubmit={handleKeywordSubmit} className="mb-6">
-                <input
-                  type="text"
-                  value={keywordInput}
-                  onChange={(e) => setKeywordInput(e.target.value)}
-                  placeholder="Entrez un mot-clé..."
-                  className="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                  required
-                />
-                <button
-                  type="submit"
-                  className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-transform transform hover:scale-105"
-                >
-                  Valider le mot-clé
-                </button>
-              </form>
-
-              {/* Légende des couleurs pour les mots-clés */}
-              <div className="mb-4 text-sm text-gray-600">
-                <span className="font-medium">Légende : </span>
-                <span className="text-red-500">Rouge</span> : Mot peu similaire,{" "}
-                <span className="text-orange-500">Orange</span> : Mot très proche,{" "}
-                <span className="text-green-500">Vert</span> : Mot exact.
-              </div>
-
-              {/* Historique des mots-clés trié par couleur */}
-              <div className="mb-6">
-                <h3 className="font-semibold text-gray-800 mb-2">Historique des mots-clés :</h3>
-                <ul className="list-disc pl-5">
-                  {sortedKeywordsHistory.map((entry, index) => (
-                    <li key={index} style={{ color: entry.color }} className="mb-1">
-                      {entry.word}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Formulaire de saisie de la réponse */}
-              <form onSubmit={handleAnswerSubmit} className="mb-6">
-                <input
-                  type="text"
-                  value={answerInput}
-                  onChange={(e) => setAnswerInput(e.target.value)}
-                  placeholder="Entre le nom de la maladie..."
-                  className="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                  required
-                />
-                <button
-                  type="submit"
-                  className={`w-full py-3 rounded-lg transition-transform transform hover:scale-105 text-white ${
-                    isChallenge ? "bg-purple-500 hover:bg-purple-600" : "bg-indigo-500 hover:bg-indigo-600"
-                  }`}
-                >
-                  Valider ma réponse
-                </button>
-              </form>
-
+        {/* Contenu principal centré */}
+        <main className="flex-grow flex items-center justify-center">
+          {/* Ici se trouve la zone de jeu */}
+          <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden my-6 p-6">
+            <main>
               {isLibre && (
-                <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 mb-6">
-                  <button
-                    onClick={handleHint}
-                    className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-transform transform hover:scale-105"
-                  >
-                    Indice
-                  </button>
-                  <button
-                    onClick={handleShowAnswer}
-                    className="w-full py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-transform transform hover:scale-105"
-                  >
-                    Réponse
-                  </button>
-                  <button
-                    onClick={handleNewGame}
-                    className="w-full py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-transform transform hover:scale-105"
-                  >
-                    Nouvelle partie
-                  </button>
+                <div className="mb-6 flex flex-col sm:flex-row items-center justify-between">
+                  <div>
+                    <label className="mr-2 font-medium text-gray-700">Durée de jeu :</label>
+                    <select
+                      value={duration}
+                      onChange={(e) => setDuration(parseInt(e.target.value))}
+                      className="border p-1 rounded"
+                    >
+                      <option value={0}>Choisir...</option>
+                      <option value={5}>5 minutes</option>
+                      <option value={10}>10 minutes</option>
+                      <option value={20}>20 minutes</option>
+                      <option value={30}>30 minutes</option>
+                    </select>
+                  </div>
+                  {timerActive && (
+                    <div className="mt-4 sm:mt-0">
+                      <span className="font-medium text-gray-700">Temps restant :</span>{" "}
+                      <strong className="text-indigo-600">{formatTime(timeLeft)}</strong>
+                    </div>
+                  )}
                 </div>
               )}
-            </>
-          ) : (
-            // Mode Challenge figé
-            <div className="mb-6">
-              <p className="text-lg font-medium text-gray-800">{feedback}</p>
-              {correct && (
-                <div className="mt-4">
-                  <Link
-                    href={targetLink}
-                    className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 inline-block transition-transform transform hover:scale-105"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Accéder au chapitre du référentiel
-                  </Link>
-                </div>
-              )}
-            </div>
-          )}
 
-          {/* Bloc de feedback commun (pour les cas non figés) */}
-          {feedback && !frozen && (
-            <div className="mt-6 p-4 bg-yellow-100 rounded-lg text-center">
-              <p className="text-lg font-medium text-gray-800">{feedback}</p>
-              {correct && (
-                <div className="mt-4">
-                  <Link
-                    href={targetLink}
-                    className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 inline-block transition-transform transform hover:scale-105"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Accéder au chapitre du référentiel
-                  </Link>
+              <div className="mb-4">
+                <p className="text-sm text-gray-700">
+                  La maladie contient : <strong>{diseaseWordCount} mot(s)</strong>
+                </p>
+              </div>
+
+              {!frozen ? (
+                <>
+                  <form onSubmit={handleKeywordSubmit} className="mb-6">
+                    <input
+                      type="text"
+                      value={keywordInput}
+                      onChange={(e) => setKeywordInput(e.target.value)}
+                      placeholder="Entrez un mot-clé..."
+                      className="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      required
+                    />
+                    <button
+                      type="submit"
+                      className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-transform transform hover:scale-105"
+                    >
+                      Valider le mot-clé
+                    </button>
+                  </form>
+
+                  <div className="mb-4 text-sm text-gray-600">
+                    <span className="font-medium">Légende : </span>
+                    <span className="text-red-500">Rouge</span> : Mot peu similaire,{" "}
+                    <span className="text-orange-500">Orange</span> : Mot très proche,{" "}
+                    <span className="text-green-500">Vert</span> : Mot exact.
+                  </div>
+
+                  <div className="mb-6">
+                    <h3 className="font-semibold text-gray-800 mb-2">Historique des mots-clés :</h3>
+                    <ul className="list-disc pl-5">
+                      {sortedKeywordsHistory.map((entry, index) => (
+                        <li key={index} style={{ color: entry.color }} className="mb-1">
+                          {entry.word}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <form onSubmit={handleAnswerSubmit} className="mb-6">
+                    <input
+                      type="text"
+                      value={answerInput}
+                      onChange={(e) => setAnswerInput(e.target.value)}
+                      placeholder="Entre le nom de la maladie..."
+                      className="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                      required
+                    />
+                    <button
+                      type="submit"
+                      className={`w-full py-3 rounded-lg transition-transform transform hover:scale-105 text-white ${
+                        isChallenge ? "bg-purple-500 hover:bg-purple-600" : "bg-indigo-500 hover:bg-indigo-600"
+                      }`}
+                    >
+                      Valider ma réponse
+                    </button>
+                  </form>
+
+                  {isLibre && (
+                    <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 mb-6">
+                      <button
+                        onClick={handleHint}
+                        className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-transform transform hover:scale-105"
+                      >
+                        Indice
+                      </button>
+                      <button
+                        onClick={handleShowAnswer}
+                        className="w-full py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-transform transform hover:scale-105"
+                      >
+                        Réponse
+                      </button>
+                      <button
+                        onClick={handleNewGame}
+                        className="w-full py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-transform transform hover:scale-105"
+                      >
+                        Nouvelle partie
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="mb-6">
+                  <p className="text-lg font-medium text-gray-800">{feedback}</p>
+                  {correct && (
+                    <div className="mt-4">
+                      <Link
+                        href={targetLink}
+                        className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 inline-block transition-transform transform hover:scale-105"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Accéder au chapitre du référentiel
+                      </Link>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
-          )}
+
+              {feedback && !frozen && (
+                <div className="mt-6 p-4 bg-yellow-100 rounded-lg text-center">
+                  <p className="text-lg font-medium text-gray-800">{feedback}</p>
+                  {correct && (
+                    <div className="mt-4">
+                      <Link
+                        href={targetLink}
+                        className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 inline-block transition-transform transform hover:scale-105"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Accéder au chapitre du référentiel
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
+            </main>
+          </div>
         </main>
       </div>
-    </div>
+      {/* Footer commun */}
+      <Footer />
+    </Background>
   );
 }
