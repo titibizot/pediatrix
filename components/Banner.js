@@ -15,4 +15,9 @@ const Banner = ({ title, backgroundImage }) => {
   );
 };
 
+// Ajout de defaultProps pour rendre backgroundImage optionnel
+Banner.defaultProps = {
+  backgroundImage: "", // ou null, selon vos préférences
+};
+
 export default Banner;
