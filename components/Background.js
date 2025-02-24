@@ -1,7 +1,7 @@
 // components/Background.js
 import React from "react";
 
-const Background = ({ backgroundImage, children, style }) => {
+const Background = ({ backgroundImage, children, style = {} }) => {
   return (
     <div
       className="w-full min-h-screen bg-cover bg-center relative"
