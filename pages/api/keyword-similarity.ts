@@ -1,3 +1,4 @@
+// pages/api/keyword-similarity.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import axios from 'axios';
 import { newStemmer } from 'snowball-stemmers';
@@ -6,14 +7,24 @@ import { newStemmer } from 'snowball-stemmers';
 const frenchStemmer = newStemmer("french");
 
 /**
- * Normalise un mot : retire les accents, les tirets, espaces, apostrophes,
- * met en minuscules, puis applique le stemming.
+ * Normalise un mot en préservant les 3 premiers caractères et en appliquant
+ * la transformation (stemmatisation, suppression d'accents, etc.) uniquement sur le reste.
  */
 function normalizeWord(word: string): string {
   // Supprimer tirets, espaces et apostrophes
   const cleaned = word.replace(/[-’' ]/g, "");
-  const normalized = cleaned.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  return frenchStemmer.stem(normalized);
+  // Normaliser : enlever les accents sans changer la casse pour l'instant
+  const normalized = cleaned.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  // Nombre de caractères à préserver (préfixe)
+  const prefixLength = 4;
+  if (normalized.length <= prefixLength) {
+    return normalized.toLowerCase();
+  }
+  const prefix = normalized.slice(0, prefixLength).toLowerCase();
+  const suffix = normalized.slice(prefixLength);
+  // Appliquer le stemming sur le suffixe en minuscules
+  const stemmedSuffix = frenchStemmer.stem(suffix.toLowerCase());
+  return prefix + stemmedSuffix;
 }
 
 /**
@@ -37,7 +48,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ message: "Paramètres manquants : 'word' et 'targetKeywords' sont requis." });
   }
 
-  // Normalisation du mot soumis.
+  // Normalisation du mot soumis avec la nouvelle fonction
   const normalizedStudentWord = normalizeWord(word);
   let bestSimilarity = -Infinity;
   let bestKeyword: string | null = null;

@@ -119,14 +119,9 @@ export default function Home() {
                   Cemantix
                 </a>
               </Link>
-              , met à l’épreuve vos connaissances en pédiatrie de façon ludique et stimulante.
-              Il s'inspire du{" "}
-              <Link href="https://www.pedia-univ.fr/deuxieme-cycle/referentiel/prefaces" legacyBehavior>
-                <a target="_blank" rel="noopener noreferrer" className="underline text-blue-600 hover:text-blue-800">
-                  référentiel de pédiatrie
-                </a>
-              </Link>
-              .
+              , met à l’épreuve vos connaissances en obstétrique de façon ludique et stimulante.
+              Il s'inspire du référentiel 
+			  d'obstétrique.  
             </p>
             <ul className="mb-4 list-disc list-inside text-gray-700 text-left mx-auto">
               <li>
@@ -137,8 +132,8 @@ export default function Home() {
               </li>
             </ul>
             <p className="mb-4 text-gray-700">
-              Dans les deux modes, votre objectif est de deviner une maladie pédiatrique référencée dans notre base.
-              Saisissez des mots-clés pour voir leur proximité avec la réponse. À vous de jouer !
+              Dans les deux modes, votre objectif est de deviner une maladie de gynécologie-obstétrique référencée dans notre base. Vous pourrez jouer avec une vingtaine de maladies.
+              Saisissez des mots-clés pour voir leur proximité avec la réponse, puis saisissez le nom de la maladie dans le champ dédié. À vous de jouer !
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-6">
               <Link href="/Obstetrix/game?mode=challenge" legacyBehavior>
