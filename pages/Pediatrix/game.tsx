@@ -33,8 +33,10 @@ export default function Game() {
   const [timeLeft, setTimeLeft] = useState(0);   // secondes
   const [timerActive, setTimerActive] = useState(false);
 
-  // Réinitialisation lors du changement de mode
+  // Attendre que le router soit prêt avant de lancer les useEffect
   useEffect(() => {
+    if (!router.isReady) return;
+    // Réinitialisation lors du changement de mode
     setKeywordsHistory([]);
     setAnswerInput("");
     setFeedback("");
@@ -43,7 +45,6 @@ export default function Game() {
     setDuration(0);
     setTimeLeft(0);
     setTimerActive(false);
-
     if (isChallenge) {
       const today = new Date().toISOString().split("T")[0];
       const saved = localStorage.getItem("challengeCompleted_pediatrie");
@@ -56,10 +57,11 @@ export default function Game() {
     } else {
       setFrozen(false);
     }
-  }, [mode, isChallenge]);
+  }, [router.isReady, mode, isChallenge]);
 
   // Récupération de la maladie pour le mode Challenge
   useEffect(() => {
+    if (!router.isReady) return;
     if (isChallenge) {
       setLoading(true);
       axios
@@ -74,10 +76,11 @@ export default function Game() {
           setLoading(false);
         });
     }
-  }, [isChallenge]);
+  }, [router.isReady, isChallenge]);
 
   // Récupération de la maladie pour le mode Libre
   useEffect(() => {
+    if (!router.isReady) return;
     if (isLibre) {
       setLoading(true);
       axios
@@ -92,7 +95,7 @@ export default function Game() {
           setLoading(false);
         });
     }
-  }, [isLibre]);
+  }, [router.isReady, isLibre]);
 
   // Objet par défaut pour la maladie
   const defaultDisease = {
@@ -101,13 +104,12 @@ export default function Game() {
     keywords: ["détresse", "sifflements"],
   };
 
-  // Sélection de la maladie
+  // Sélection de la maladie (si l'API n'a pas renvoyé de donnée, on utilise la valeur par défaut)
   const diseaseData = isChallenge ? dailyDisease : currentDisease;
   const { name: targetDisease, link: targetLink, keywords: targetKeywords } =
     diseaseData || defaultDisease;
 
-  // Calcul du nombre de lettres (sans espaces) et de mots
-  const letterCount = targetDisease.replace(/\s/g, "").length;
+  // Calcul du nombre de mots du nom de la maladie
   const diseaseWordCount = targetDisease.trim().split(/\s+/).length;
 
   // Timer (mode Libre)
@@ -131,10 +133,10 @@ export default function Game() {
     return () => clearInterval(interval);
   }, [timeLeft, timerActive]);
 
-  // Tri de l'historique des mots-clés : les mots avec de meilleures correspondances (green/darkgreen) apparaissent en haut
+  // Tri de l'historique des mots-clés : on souhaite que les mots avec de meilleures correspondances (green/darkgreen) apparaissent en haut
   const sortedKeywordsHistory = [...keywordsHistory].sort((a, b) => {
     const order = { green: 1, darkgreen: 1, orange: 2, red: 3 };
-    return (order[b.color] || 0) - (order[a.color] || 0);
+    return (order[a.color] || 4) - (order[b.color] || 4);
   });
 
   // Formatage du temps en mm:ss
@@ -231,6 +233,7 @@ export default function Game() {
     axios
       .get("/api/randomDisease?specialty=pediatrie")
       .then((res) => {
+        console.log("Nouvelle maladie:", res.data);
         setCurrentDisease(res.data);
         setKeywordsHistory([]);
         setAnswerInput("");
@@ -372,7 +375,7 @@ export default function Game() {
                 </p>
               </div>
 
-              {/* Formulaire de réponse en second, avec tooltip indiquant le nombre de lettres */}
+              {/* Formulaire de réponse en second */}
               {!frozen && (
                 <form onSubmit={handleAnswerSubmit} className="mb-6">
                   <input
@@ -380,7 +383,6 @@ export default function Game() {
                     value={answerInput}
                     onChange={(e) => setAnswerInput(e.target.value)}
                     placeholder="Entre le nom de la maladie..."
-                    title={`La maladie contient ${letterCount} lettres`}
                     className="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-300"
                     required
                   />
