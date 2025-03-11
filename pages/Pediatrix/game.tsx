@@ -4,8 +4,8 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import Link from "next/link";
 import Image from "next/image";
-import Background from "../../components/Background"; // Vérifie le chemin
-import Footer from "../../components/Footer"; // Vérifie le chemin
+import Background from "../../components/Background";
+import Footer from "../../components/Footer";
 
 export default function Game() {
   const router = useRouter();
@@ -15,7 +15,25 @@ export default function Game() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [frozen, setFrozen] = useState(false);
 
-  // Réinitialisation de l'état du jeu lors du changement de mode
+  // États pour récupérer la maladie selon le mode
+  const [dailyDisease, setDailyDisease] = useState(null);
+  const [currentDisease, setCurrentDisease] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // États pour la saisie et la logique du jeu
+  const [keywordInput, setKeywordInput] = useState("");
+  const [keywordsHistory, setKeywordsHistory] = useState([]);
+  const [correct, setCorrect] = useState(false);
+  const [answerInput, setAnswerInput] = useState("");
+  const [feedback, setFeedback] = useState("");
+  const [hints, setHints] = useState([]);
+
+  // Timer pour le mode Libre
+  const [duration, setDuration] = useState(0); // minutes
+  const [timeLeft, setTimeLeft] = useState(0); // secondes
+  const [timerActive, setTimerActive] = useState(false);
+
+  // Réinitialiser l'état du jeu quand le mode change
   useEffect(() => {
     setKeywordsHistory([]);
     setAnswerInput("");
@@ -28,7 +46,7 @@ export default function Game() {
 
     if (isChallenge) {
       const today = new Date().toISOString().split("T")[0];
-      const saved = localStorage.getItem("challengeCompleted");
+      const saved = localStorage.getItem("challengeCompleted_pediatrie");
       if (saved === today) {
         setFrozen(true);
         setFeedback("Vous avez déjà trouvé la réponse aujourd'hui. Attendez le renouvellement à minuit.");
@@ -39,11 +57,6 @@ export default function Game() {
       setFrozen(false);
     }
   }, [mode, isChallenge]);
-
-  // États pour récupérer la maladie selon le mode
-  const [dailyDisease, setDailyDisease] = useState(null);
-  const [currentDisease, setCurrentDisease] = useState(null);
-  const [loading, setLoading] = useState(false);
 
   // Récupération de la maladie pour le mode Challenge
   useEffect(() => {
@@ -91,22 +104,10 @@ export default function Game() {
   const { name: targetDisease, link: targetLink, keywords: targetKeywords } =
     diseaseData || defaultDisease;
 
-  // Calcul du nombre de mots du nom de la maladie
+  // Calcul du nombre de mots composant le nom de la maladie
   const diseaseWordCount = targetDisease.trim().split(/\s+/).length;
 
-  // États pour la saisie et la logique du jeu
-  const [keywordInput, setKeywordInput] = useState("");
-  const [keywordsHistory, setKeywordsHistory] = useState([]);
-  const [correct, setCorrect] = useState(false);
-  const [answerInput, setAnswerInput] = useState("");
-  const [feedback, setFeedback] = useState("");
-  const [hints, setHints] = useState([]);
-
-  // Timer pour le mode Libre
-  const [duration, setDuration] = useState(0); // en minutes
-  const [timeLeft, setTimeLeft] = useState(0);   // en secondes
-  const [timerActive, setTimerActive] = useState(false);
-
+  // Timer (mode Libre)
   useEffect(() => {
     if (isLibre && duration > 0) {
       setTimeLeft(duration * 60);
@@ -127,9 +128,10 @@ export default function Game() {
     return () => clearInterval(interval);
   }, [timeLeft, timerActive]);
 
-  // Fonction de mélange (Fisher-Yates)
+  // Fonction de mélange Fisher-Yates
   const shuffleArray = (array) => {
-    let currentIndex = array.length, randomIndex;
+    let currentIndex = array.length,
+      randomIndex;
     while (currentIndex !== 0) {
       randomIndex = Math.floor(Math.random() * currentIndex);
       currentIndex--;
@@ -148,17 +150,14 @@ export default function Game() {
         targetKeywords,
       });
       const { color } = response.data;
-      setKeywordsHistory((prev) => [
-        ...prev,
-        { word: keywordInput, color },
-      ]);
+      setKeywordsHistory((prev) => [...prev, { word: keywordInput, color }]);
     } catch (error) {
       console.error(error);
     }
     setKeywordInput("");
   };
 
-  // Soumission de la réponse
+  // Soumission de la réponse avec message gradué
   const handleAnswerSubmit = (e) => {
     e.preventDefault();
     if (!answerInput.trim()) return;
@@ -180,9 +179,24 @@ export default function Game() {
         `Bravo ! Vous avez trouvé la maladie : ${targetDisease} grâce à ${keywordCount} mot(s)-clés. ${grade}`
       );
       setCorrect(true);
+
+      // Enregistrer la session si mode Challenge
       if (isChallenge) {
+        axios
+          .post("/api/recordChallenge", {
+            mode: "challenge",
+            success: true,
+            diseaseId: diseaseData ? diseaseData.name : "inconnu",
+          })
+          .then((res) => {
+            console.log("Session enregistrée :", res.data);
+          })
+          .catch((error) => {
+            console.error("Erreur lors de l'enregistrement de la session :", error);
+          });
+
         const today = new Date().toISOString().split("T")[0];
-        localStorage.setItem("challengeCompleted", today);
+        localStorage.setItem("challengeCompleted_pediatrie", today);
         setFrozen(true);
       }
     } else {
@@ -228,10 +242,11 @@ export default function Game() {
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
-  // Tri des mots-clés par ordre de couleur
+  // Tri des mots-clés par ordre de couleur (verts en haut)
   const sortedKeywordsHistory = [...keywordsHistory].sort((a, b) => {
-    const order = { darkgreen: 1, green: 1, orange: 2, red: 3 };
-    return (order[a.color] || 4) - (order[b.color] || 4);
+    // Valeurs plus élevées pour vert/darkgreen afin de les trier en haut
+    const order = { red: 1, orange: 2, green: 3, darkgreen: 3 };
+    return (order[b.color] || 0) - (order[a.color] || 0);
   });
 
   return (
@@ -241,32 +256,33 @@ export default function Game() {
         <nav className="bg-white shadow-md">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
+              {/* alt="" si l'image est purement décorative et "Pédiatrix" est déjà visible */}
               <Image
-                src="/logo.jpeg"
-                alt="Logo Pédiatrix"
-                width={160}
-                height={160}
+                src="/logopediatrix.jpg"
+                alt=""
+                width={60}
+                height={60}
                 className="object-cover rounded-full"
               />
-              <span className="text-2xl font-bold text-blue-700">Pédiatrix</span>
+              <span className="text-2xl font-bold text-blue-900">Pédiatrix</span>
             </div>
             {/* Liens de navigation pour desktop */}
             <div className="hidden sm:flex space-x-8">
               <Link href="/Pediatrix" legacyBehavior>
-                <a className="text-sm font-medium text-gray-500 hover:text-gray-700">
+                <a className="text-sm font-medium text-blue-900 hover:text-blue-800 focus:outline-none focus:ring">
                   Page d'accueil
                 </a>
               </Link>
               {isChallenge && (
                 <Link href="/Pediatrix/game?mode=libre" legacyBehavior>
-                  <a className="text-sm font-medium text-gray-500 hover:text-gray-700">
+                  <a className="text-sm font-medium text-blue-900 hover:text-blue-800 focus:outline-none focus:ring">
                     Jeu libre
                   </a>
                 </Link>
               )}
               {isLibre && (
                 <Link href="/Pediatrix/game?mode=challenge" legacyBehavior>
-                  <a className="text-sm font-medium text-gray-500 hover:text-gray-700">
+                  <a className="text-sm font-medium text-blue-900 hover:text-blue-800 focus:outline-none focus:ring">
                     Challenge
                   </a>
                 </Link>
@@ -277,18 +293,10 @@ export default function Game() {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+                className="inline-flex items-center justify-center p-2 rounded-md text-blue-900 hover:text-blue-800 hover:bg-gray-100 focus:outline-none focus:ring"
               >
                 <span className="sr-only">Ouvrir le menu</span>
-                {mobileMenuOpen ? (
-                  <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                ) : (
-                  <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                )}
+                Menu
               </button>
             </div>
           </div>
@@ -296,20 +304,20 @@ export default function Game() {
             <div className="sm:hidden">
               <div className="pt-2 pb-3 space-y-1">
                 <Link href="/Pediatrix" legacyBehavior>
-                  <a className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-500 hover:text-gray-800">
+                  <a className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-blue-900 hover:bg-gray-50 focus:outline-none focus:ring">
                     Page d'accueil
                   </a>
                 </Link>
                 {isChallenge && (
                   <Link href="/Pediatrix/game?mode=libre" legacyBehavior>
-                    <a className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-green-500 hover:text-green-700">
+                    <a className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-blue-900 hover:bg-gray-50 focus:outline-none focus:ring">
                       Jeu libre
                     </a>
                   </Link>
                 )}
                 {isLibre && (
                   <Link href="/Pediatrix/game?mode=challenge" legacyBehavior>
-                    <a className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-blue-500 hover:text-blue-700">
+                    <a className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-blue-900 hover:bg-gray-50 focus:outline-none focus:ring">
                       Challenge
                     </a>
                   </Link>
@@ -319,171 +327,167 @@ export default function Game() {
           )}
         </nav>
 
-        {/* Contenu principal centré */}
+        {/* Contenu principal */}
         <main className="flex-grow flex items-center justify-center">
-          <div className="max-w-3xl w-full bg-white rounded-xl shadow-lg overflow-hidden my-6 p-6">
-            {/* Bannière (optionnelle) */}
-            <div
-              className="w-full h-64 relative bg-cover bg-center"
-              style={{ backgroundImage: "url('/your-image-path.jpeg')", backgroundPosition: "50% 30%" }}
-            >
-              <div className="absolute inset-0 bg-black opacity-50"></div>
-              <h1 className="relative text-4xl md:text-5xl font-bold text-white text-center pt-20">
-                {isChallenge ? "Challenge" : isLibre ? "Jeu libre" : "Bienvenue"}
-              </h1>
+          <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden my-6 p-6">
+            {/* Options de durée si mode libre */}
+            {isLibre && (
+              <div className="mb-6 flex flex-col sm:flex-row items-center justify-between">
+                <div>
+                  <label className="mr-2 font-medium text-gray-800">Durée de jeu :</label>
+                  <select
+                    value={duration}
+                    onChange={(e) => setDuration(parseInt(e.target.value))}
+                    className="border p-1 rounded focus:outline-none focus:ring"
+                  >
+                    <option value={0}>Choisir...</option>
+                    <option value={5}>5 minutes</option>
+                    <option value={10}>10 minutes</option>
+                    <option value={20}>20 minutes</option>
+                    <option value={30}>30 minutes</option>
+                  </select>
+                </div>
+                {timerActive && (
+                  <div className="mt-4 sm:mt-0">
+                    <span className="font-medium text-gray-800">Temps restant :</span>{" "}
+                    <strong className="text-indigo-700">{formatTime(timeLeft)}</strong>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="mb-4">
+              <p className="text-sm text-gray-800">
+                La maladie contient : <strong>{diseaseWordCount} mot(s)</strong>
+              </p>
             </div>
 
-            {/* Formulaires et contenu de jeu */}
-            <main>
-              {isLibre && (
-                <div className="mb-6 flex flex-col sm:flex-row items-center justify-between">
-                  <div>
-                    <label className="mr-2 font-medium text-gray-700">Durée de jeu :</label>
-                    <select
-                      value={duration}
-                      onChange={(e) => setDuration(parseInt(e.target.value))}
-                      className="border p-1 rounded"
-                    >
-                      <option value={0}>Choisir...</option>
-                      <option value={5}>5 minutes</option>
-                      <option value={10}>10 minutes</option>
-                      <option value={20}>20 minutes</option>
-                      <option value={30}>30 minutes</option>
-                    </select>
-                  </div>
-                  {timerActive && (
-                    <div className="mt-4 sm:mt-0">
-                      <span className="font-medium text-gray-700">Temps restant :</span>{" "}
-                      <strong className="text-indigo-600">{formatTime(timeLeft)}</strong>
-                    </div>
-                  )}
+            {/* Contenu si la partie n'est pas figée */}
+            {!frozen ? (
+              <>
+                {/* Formulaire de mot-clé */}
+                <form onSubmit={handleKeywordSubmit} className="mb-6">
+                  <input
+                    type="text"
+                    value={keywordInput}
+                    onChange={(e) => setKeywordInput(e.target.value)}
+                    placeholder="Entrez un mot-clé..."
+                    className="w-full p-3 border border-gray-400 rounded-lg mb-3 focus:outline-none focus:ring focus:border-blue-800"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    className="w-full py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring"
+                  >
+                    Valider le mot-clé
+                  </button>
+                </form>
+
+                <div className="mb-4 text-sm text-gray-800">
+                  <span className="font-medium">Légende : </span>
+                  <span className="text-red-700">Rouge</span> : Mot peu similaire,{" "}
+                  <span className="text-orange-700">Orange</span> : Mot très proche,{" "}
+                  <span className="text-green-700">Vert</span> : Mot exact.
                 </div>
-              )}
 
-              <div className="mb-4">
-                <p className="text-sm text-gray-700">
-                  La maladie contient : <strong>{diseaseWordCount} mot(s)</strong>
-                </p>
-              </div>
-
-              {!frozen ? (
-                <>
-                  <form onSubmit={handleKeywordSubmit} className="mb-6">
-                    <input
-                      type="text"
-                      value={keywordInput}
-                      onChange={(e) => setKeywordInput(e.target.value)}
-                      placeholder="Entrez un mot-clé..."
-                      className="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                      required
-                    />
-                    <button
-                      type="submit"
-                      className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-transform transform hover:scale-105"
-                    >
-                      Valider le mot-clé
-                    </button>
-                  </form>
-
-                  <div className="mb-4 text-sm text-gray-600">
-                    <span className="font-medium">Légende : </span>
-                    <span className="text-red-500">Rouge</span> : Mot peu similaire,{" "}
-                    <span className="text-orange-500">Orange</span> : Mot très proche,{" "}
-                    <span className="text-green-500">Vert</span> : Mot exact.
-                  </div>
-
-                  <div className="mb-6">
-                    <h3 className="font-semibold text-gray-800 mb-2">Historique des mots-clés :</h3>
-                    <ul className="list-disc pl-5">
-                      {sortedKeywordsHistory.map((entry, index) => (
-                        <li key={index} style={{ color: entry.color }} className="mb-1">
-                          {entry.word}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <form onSubmit={handleAnswerSubmit} className="mb-6">
-                    <input
-                      type="text"
-                      value={answerInput}
-                      onChange={(e) => setAnswerInput(e.target.value)}
-                      placeholder="Entre le nom de la maladie..."
-                      className="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                      required
-                    />
-                    <button
-                      type="submit"
-                      className={`w-full py-3 rounded-lg transition-transform transform hover:scale-105 text-white ${
-                        isChallenge ? "bg-purple-500 hover:bg-purple-600" : "bg-indigo-500 hover:bg-indigo-600"
-                      }`}
-                    >
-                      Valider ma réponse
-                    </button>
-                  </form>
-
-                  {isLibre && (
-                    <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 mb-6">
-                      <button
-                        onClick={handleHint}
-                        className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-transform transform hover:scale-105"
-                      >
-                        Indice
-                      </button>
-                      <button
-                        onClick={handleShowAnswer}
-                        className="w-full py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-transform transform hover:scale-105"
-                      >
-                        Réponse
-                      </button>
-                      <button
-                        onClick={handleNewGame}
-                        className="w-full py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-transform transform hover:scale-105"
-                      >
-                        Nouvelle partie
-                      </button>
-                    </div>
-                  )}
-                </>
-              ) : (
                 <div className="mb-6">
-                  <p className="text-lg font-medium text-gray-800">{feedback}</p>
-                  {correct && (
-                    <div className="mt-4">
-                      <Link
-                        href={targetLink}
-                        className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 inline-block transition-transform transform hover:scale-105"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Accéder au chapitre du référentiel
-                      </Link>
-                    </div>
-                  )}
+                  <h3 className="font-semibold text-gray-900 mb-2">Historique des mots-clés :</h3>
+                  <ul className="list-disc pl-5">
+                    {sortedKeywordsHistory.map((entry, index) => (
+                      <li key={index} style={{ color: entry.color }} className="mb-1">
+                        {entry.word}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              )}
 
-              {feedback && !frozen && (
-                <div className="mt-6 p-4 bg-yellow-100 rounded-lg text-center">
-                  <p className="text-lg font-medium text-gray-800">{feedback}</p>
-                  {correct && (
-                    <div className="mt-4">
-                      <Link
-                        href={targetLink}
-                        className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 inline-block transition-transform transform hover:scale-105"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Accéder au chapitre du référentiel
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              )}
-            </main>
+                {/* Formulaire de réponse */}
+                <form onSubmit={handleAnswerSubmit} className="mb-6">
+                  <input
+                    type="text"
+                    value={answerInput}
+                    onChange={(e) => setAnswerInput(e.target.value)}
+                    placeholder="Entre le nom de la maladie..."
+                    className="w-full p-3 border border-gray-400 rounded-lg mb-3 focus:outline-none focus:ring focus:border-blue-800"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    className={`w-full py-3 rounded-lg transition-transform transform hover:scale-105 text-white focus:outline-none focus:ring ${
+                      isChallenge
+                        ? "bg-purple-700 hover:bg-purple-800"
+                        : "bg-indigo-700 hover:bg-indigo-800"
+                    }`}
+                  >
+                    Valider ma réponse
+                  </button>
+                </form>
+
+                {/* Boutons supplémentaires si mode libre */}
+                {isLibre && (
+                  <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 mb-6">
+                    <button
+                      onClick={handleHint}
+                      className="w-full py-3 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring"
+                    >
+                      Indice
+                    </button>
+                    <button
+                      onClick={handleShowAnswer}
+                      className="w-full py-3 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring"
+                    >
+                      Réponse
+                    </button>
+                    <button
+                      onClick={handleNewGame}
+                      className="w-full py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-transform transform hover:scale-105 focus:outline-none focus:ring"
+                    >
+                      Nouvelle partie
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              // Contenu si la partie est figée (mode challenge résolu)
+              <div className="mb-6">
+                <p className="text-lg font-medium text-gray-900">{feedback}</p>
+                {correct && (
+                  <div className="mt-4">
+                    <Link
+                      href={targetLink}
+                      className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-800 inline-block transition-transform transform hover:scale-105 focus:outline-none focus:ring"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Accéder au chapitre du référentiel
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Affichage du feedback si la partie n'est pas figée */}
+            {feedback && !frozen && (
+              <div className="mt-6 p-4 bg-yellow-100 rounded-lg text-center">
+                <p className="text-lg font-medium text-gray-900">{feedback}</p>
+                {correct && (
+                  <div className="mt-4">
+                    <Link
+                      href={targetLink}
+                      className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-800 inline-block transition-transform transform hover:scale-105 focus:outline-none focus:ring"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Accéder au chapitre du référentiel
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </main>
       </div>
+
       {/* Footer commun */}
       <Footer />
     </Background>

@@ -17,7 +17,7 @@ export default function Contact() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/api/contact", formData);
+      await axios.post("/api/contact", formData);
       setStatus("Message envoyé avec succès.");
       setFormData({ name: "", email: "", message: "" });
     } catch (error) {
@@ -31,9 +31,9 @@ export default function Contact() {
       {/* Barre de navigation */}
       <nav className="bg-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-4">
             <Link href="/" legacyBehavior>
-              <a className="flex items-center">
+              <a className="flex items-center cursor-pointer focus:outline-none focus:ring">
                 <Image
                   src="/logodiagnostix.jpg"
                   alt="Logo Diagnostix"
@@ -41,13 +41,13 @@ export default function Contact() {
                   height={60}
                   className="object-cover rounded-full"
                 />
-                <span className="text-2xl font-bold text-blue-700 ml-2">Diagnostix</span>
+                <span className="text-3xl font-bold text-blue-900 ml-2">Diagnostix</span>
               </a>
             </Link>
           </div>
           <div className="hidden sm:flex">
             <Link href="/" legacyBehavior>
-              <a className="text-sm font-medium text-gray-500 hover:text-gray-700">
+              <a className="text-sm font-medium text-blue-900 hover:text-blue-800 focus:outline-none focus:ring">
                 Retour à l'accueil
               </a>
             </Link>
@@ -56,60 +56,71 @@ export default function Contact() {
       </nav>
 
       {/* Contenu principal */}
-      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden my-6 p-6">
-        <h1 className="text-3xl font-bold text-center mb-4">Contact</h1>
-        <p className="mb-6 text-gray-700">
-          Vous avez quelque chose à partager avec nous, deux solutions:
+      <div className="max-w-3xl mx-auto bg-white shadow-md rounded-lg p-6 my-6">
+        <h1 className="text-3xl font-bold text-center mb-4 text-blue-900">Contact</h1>
+        <p className="mb-6 text-gray-800">
+          Vous avez quelque chose à partager avec nous ? Vous disposez de deux solutions :
         </p>
-        <ul className="list-disc pl-6 mb-6 text-gray-700">
+        <ul className="list-disc pl-6 mb-6 text-gray-800">
           <li>Utiliser la boîte de contact ci-dessous.</li>
-          <li>Ou envoyer directement un mail à : <span className="font-bold">diagnostixgame@gmail.com</span></li>
+          <li>
+            Ou envoyer directement un mail à : <span className="font-bold">diagnostixgame@gmail.com</span>
+          </li>
         </ul>
 
         {/* Formulaire de contact */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-gray-700">Nom :</label>
+            <label htmlFor="name" className="block text-gray-800 mb-1">
+              Nom :
+            </label>
             <input
               type="text"
+              id="name"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded"
+              className="w-full p-2 border border-gray-400 rounded focus:outline-none focus:ring focus:border-blue-800"
               required
             />
           </div>
           <div>
-            <label className="block text-gray-700">Email :</label>
+            <label htmlFor="email" className="block text-gray-800 mb-1">
+              Email :
+            </label>
             <input
               type="email"
+              id="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded"
+              className="w-full p-2 border border-gray-400 rounded focus:outline-none focus:ring focus:border-blue-800"
               required
             />
           </div>
           <div>
-            <label className="block text-gray-700">Message :</label>
+            <label htmlFor="message" className="block text-gray-800 mb-1">
+              Message :
+            </label>
             <textarea
+              id="message"
               name="message"
               value={formData.message}
               onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded"
+              className="w-full p-2 border border-gray-400 rounded focus:outline-none focus:ring focus:border-blue-800"
               rows={5}
               required
             ></textarea>
           </div>
           <button
             type="submit"
-            className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-transform transform hover:scale-105"
+            className="w-full py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring"
           >
             Envoyer
           </button>
         </form>
 
-        {status && <p className="mt-4 text-center text-green-600">{status}</p>}
+        {status && <p className="mt-4 text-center text-green-700 font-medium">{status}</p>}
       </div>
 
       <Footer />

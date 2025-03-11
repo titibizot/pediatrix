@@ -5,19 +5,20 @@ const Banner = ({ title, backgroundImage }) => {
   const style = backgroundImage
     ? { backgroundImage: `url(${backgroundImage})`, backgroundPosition: "50% 30%" }
     : {};
-
+    
   return (
     <div className="w-full h-64 relative bg-cover bg-center" style={style}>
-      <h1 className="relative text-4xl md:text-5xl font-bold text-blue-500 text-center pt-20">
+      {/* Superposition noire pour améliorer le contraste */}
+      <div className="absolute inset-0 bg-black opacity-50"></div>
+      <h1 className="relative text-4xl md:text-5xl font-bold text-white text-center pt-20 drop-shadow-lg">
         {title}
       </h1>
     </div>
   );
 };
 
-// Ajout de defaultProps pour rendre backgroundImage optionnel
 Banner.defaultProps = {
-  backgroundImage: "", // ou null, selon vos préférences
+  backgroundImage: "",
 };
 
 export default Banner;

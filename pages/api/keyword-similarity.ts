@@ -11,25 +11,18 @@ const frenchStemmer = newStemmer("french");
  * la transformation (stemmatisation, suppression d'accents, etc.) uniquement sur le reste.
  */
 function normalizeWord(word: string): string {
-  // Supprimer tirets, espaces et apostrophes
   const cleaned = word.replace(/[-’' ]/g, "");
-  // Normaliser : enlever les accents sans changer la casse pour l'instant
   const normalized = cleaned.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  // Nombre de caractères à préserver (préfixe)
-  const prefixLength = 4;
+  const prefixLength = 3;
   if (normalized.length <= prefixLength) {
     return normalized.toLowerCase();
   }
   const prefix = normalized.slice(0, prefixLength).toLowerCase();
   const suffix = normalized.slice(prefixLength);
-  // Appliquer le stemming sur le suffixe en minuscules
   const stemmedSuffix = frenchStemmer.stem(suffix.toLowerCase());
   return prefix + stemmedSuffix;
 }
 
-/**
- * Calcule la similarité cosinus entre deux vecteurs.
- */
 function cosineSimilarity(vecA: number[], vecB: number[]): number {
   const dotProduct = vecA.reduce((acc, val, i) => acc + val * vecB[i], 0);
   const normA = Math.sqrt(vecA.reduce((acc, val) => acc + val * val, 0));
@@ -38,7 +31,6 @@ function cosineSimilarity(vecA: number[], vecB: number[]): number {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  // On accepte uniquement la méthode POST.
   if (req.method !== 'POST') {
     return res.status(405).json({ message: "Méthode non autorisée" });
   }
@@ -48,24 +40,36 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ message: "Paramètres manquants : 'word' et 'targetKeywords' sont requis." });
   }
 
-  // Normalisation du mot soumis avec la nouvelle fonction
   const normalizedStudentWord = normalizeWord(word);
   let bestSimilarity = -Infinity;
   let bestKeyword: string | null = null;
   let foundExact = false;
 
-  // Vérifier la correspondance exacte ou par inclusion (après normalisation)
-  for (const keyword of targetKeywords) {
-    const normalizedKeyword = normalizeWord(keyword);
-    if (
-      normalizedKeyword === normalizedStudentWord ||
-      normalizedKeyword.includes(normalizedStudentWord) ||
-      normalizedStudentWord.includes(normalizedKeyword)
-    ) {
-      bestSimilarity = 1.0;
-      bestKeyword = keyword;
-      foundExact = true;
-      break;
+  // Pour les mots de 3 lettres ou moins, on ne fait qu'une comparaison stricte
+  if (normalizedStudentWord.length <= 3) {
+    for (const keyword of targetKeywords) {
+      const normalizedKeyword = normalizeWord(keyword);
+      if (normalizedKeyword === normalizedStudentWord) {
+        bestSimilarity = 1.0;
+        bestKeyword = keyword;
+        foundExact = true;
+        break;
+      }
+    }
+  } else {
+    // Pour les mots plus longs, on vérifie l'égalité ou l'inclusion dans l'un ou l'autre sens
+    for (const keyword of targetKeywords) {
+      const normalizedKeyword = normalizeWord(keyword);
+      if (
+        normalizedKeyword === normalizedStudentWord ||
+        normalizedKeyword.includes(normalizedStudentWord) ||
+        normalizedStudentWord.includes(normalizedKeyword)
+      ) {
+        bestSimilarity = 1.0;
+        bestKeyword = keyword;
+        foundExact = true;
+        break;
+      }
     }
   }
 
@@ -74,11 +78,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       similarity: bestSimilarity,
       bestKeyword,
       color: "lightgreen",
-      message: `Correspondance exacte ou par inclusion avec le mot clé "${bestKeyword}".`
+      message: `Correspondance exacte${normalizedStudentWord.length <= 3 ? "" : " ou par inclusion"} avec le mot clé "${bestKeyword}".`
     });
   }
 
-  // Sinon, on calcule l'embedding du mot soumis.
   try {
     const studentResponse = await axios.post(
       "https://api.openai.com/v1/embeddings",
@@ -92,7 +95,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     );
     const studentEmbedding: number[] = studentResponse.data.data[0].embedding;
 
-    // Récupérer en batch les embeddings des mots clés.
     const keywordsResponse = await axios.post(
       "https://api.openai.com/v1/embeddings",
       { input: targetKeywords, model: "text-embedding-ada-002" },
@@ -105,7 +107,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     );
     const keywordsEmbeddings: number[][] = keywordsResponse.data.data.map((item: any) => item.embedding);
 
-    // Calculer la similarité entre l'embedding du mot soumis et chaque embedding de mot clé.
     for (let i = 0; i < keywordsEmbeddings.length; i++) {
       const sim = cosineSimilarity(studentEmbedding, keywordsEmbeddings[i]);
       if (sim > bestSimilarity) {
@@ -114,7 +115,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    // Seuil défini pour déterminer la couleur
     const threshold = 0.86;
     let color = bestSimilarity >= threshold ? "orange" : "red";
 

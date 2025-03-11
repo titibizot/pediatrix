@@ -4,7 +4,8 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import Link from "next/link";
 import Image from "next/image";
-import Background from "../../components/Background"; // Vérifie le chemin
+import Head from "next/head";
+import Background from "../../components/Background";
 import Footer from "../../components/Footer";
 
 export default function Game() {
@@ -46,7 +47,7 @@ export default function Game() {
 
     if (isChallenge) {
       const today = new Date().toISOString().split("T")[0];
-      const saved = localStorage.getItem("challengeCompleted_gynécologie");
+      const saved = localStorage.getItem("challengeCompleted_obstetrix");
       if (saved === today) {
         setFrozen(true);
         setFeedback("Vous avez déjà trouvé la réponse aujourd'hui. Attendez le renouvellement à minuit.");
@@ -65,7 +66,6 @@ export default function Game() {
       axios
         .get("/api/dailyDisease?specialty=gynécologie")
         .then((res) => {
-          console.log("Daily disease:", res.data);
           setDailyDisease(res.data);
           setLoading(false);
         })
@@ -83,7 +83,6 @@ export default function Game() {
       axios
         .get("/api/randomDisease?specialty=gynécologie")
         .then((res) => {
-          console.log("Random disease:", res.data);
           setCurrentDisease(res.data);
           setLoading(false);
         })
@@ -96,7 +95,8 @@ export default function Game() {
 
   // Objet par défaut pour la maladie
   const defaultDisease = {
-    name: "Test-réactualise",
+    name: "En chargement",
+    link: "#",
     keywords: ["Test-réactualise", "Chargement"],
   };
 
@@ -130,9 +130,9 @@ export default function Game() {
     return () => clearInterval(interval);
   }, [timeLeft, timerActive]);
 
-  // Tri de l'historique des mots-clés : les mots avec de meilleures correspondances (green/darkgreen) apparaissent en haut
+  // Tri de l'historique des mots-clés
   const sortedKeywordsHistory = [...keywordsHistory].sort((a, b) => {
-    const order = { green: 1, darkgreen: 1, orange: 2, red: 3 };
+    const order = { red: 1, orange: 2, green: 3, darkgreen: 3 };
     return (order[b.color] || 0) - (order[a.color] || 0);
   });
 
@@ -154,7 +154,7 @@ export default function Game() {
     return array;
   };
 
-  // Gestionnaire du formulaire de mot-clé (empêche l'ajout d'espaces)
+  // Gestionnaire du formulaire de mot-clé
   const handleKeywordSubmit = async (e) => {
     e.preventDefault();
     if (!keywordInput.trim()) return;
@@ -188,20 +188,20 @@ export default function Game() {
       );
       setCorrect(true);
       if (isChallenge) {
-        axios.post("/api/recordChallenge", {
-          mode: "challenge",
-          success: true,
-          // On utilise le nom comme identifiant
-          diseaseId: diseaseData ? diseaseData.name : "inconnu"
-        })
-        .then((res) => {
-          console.log("Session enregistrée :", res.data);
-        })
-        .catch((error) => {
-          console.error("Erreur lors de l'enregistrement de la session :", error);
-        });
+        axios
+          .post("/api/recordChallenge", {
+            mode: "challenge",
+            success: true,
+            diseaseId: diseaseData ? diseaseData.name : "inconnu",
+          })
+          .then((res) => {
+            console.log("Session enregistrée :", res.data);
+          })
+          .catch((error) => {
+            console.error("Erreur lors de l'enregistrement de la session :", error);
+          });
         const today = new Date().toISOString().split("T")[0];
-        localStorage.setItem("challengeCompleted_gynécologie", today);
+        localStorage.setItem("challengeCompleted_obstetrix", today);
         setFrozen(true);
       }
     } else {
@@ -241,38 +241,41 @@ export default function Game() {
   };
 
   return (
-    <Background backgroundImage="/fondObstetrix.jpeg">
+    <Background backgroundImage="/fondobstetrix.jpeg">
+      <Head>
+        <title>Obstetrix – Jeu</title>
+      </Head>
       <div className="relative z-30 min-h-screen flex flex-col">
         {/* Barre de navigation */}
         <nav className="bg-white shadow-md">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
               <Image
-                src="/logoObstetrix.jpg"
-                alt="Logo Pédiatrix"
+                src="/logoobstetrix.jpg"
+                alt="Logo Obstetrix"
                 width={60}
                 height={60}
                 className="object-cover rounded-full"
               />
-              <span className="text-2xl font-bold text-blue-700">Pédiatrix</span>
+              <span className="text-2xl font-bold text-blue-900">Obstetrix</span>
             </div>
             {/* Liens de navigation pour desktop */}
             <div className="hidden sm:flex space-x-8">
               <Link href="/Obstetrix" legacyBehavior>
-                <a className="text-sm font-medium text-gray-500 hover:text-gray-700">
+                <a className="text-sm font-medium text-blue-900 hover:text-blue-800 focus:outline-none focus:ring">
                   Page d'accueil
                 </a>
               </Link>
               {isChallenge && (
                 <Link href="/Obstetrix/game?mode=libre" legacyBehavior>
-                  <a className="text-sm font-medium text-gray-500 hover:text-gray-700">
+                  <a className="text-sm font-medium text-blue-900 hover:text-blue-800 focus:outline-none focus:ring">
                     Jeu libre
                   </a>
                 </Link>
               )}
               {isLibre && (
                 <Link href="/Obstetrix/game?mode=challenge" legacyBehavior>
-                  <a className="text-sm font-medium text-gray-500 hover:text-gray-700">
+                  <a className="text-sm font-medium text-blue-900 hover:text-blue-800 focus:outline-none focus:ring">
                     Challenge
                   </a>
                 </Link>
@@ -283,7 +286,7 @@ export default function Game() {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring"
               >
                 <span className="sr-only">Ouvrir le menu</span>
                 {mobileMenuOpen ? (
@@ -302,20 +305,20 @@ export default function Game() {
             <div className="sm:hidden">
               <div className="pt-2 pb-3 space-y-1">
                 <Link href="/Obstetrix" legacyBehavior>
-                  <a className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-500 hover:text-gray-800">
+                  <a className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-500 hover:text-gray-800 focus:outline-none focus:ring">
                     Page d'accueil
                   </a>
                 </Link>
                 {isChallenge && (
                   <Link href="/Obstetrix/game?mode=libre" legacyBehavior>
-                    <a className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-green-500 hover:text-green-700">
+                    <a className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-green-500 hover:text-green-700 focus:outline-none focus:ring">
                       Jeu libre
                     </a>
                   </Link>
                 )}
                 {isLibre && (
                   <Link href="/Obstetrix/game?mode=challenge" legacyBehavior>
-                    <a className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-blue-500 hover:text-blue-700">
+                    <a className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-blue-500 hover:text-blue-700 focus:outline-none focus:ring">
                       Challenge
                     </a>
                   </Link>
@@ -326,12 +329,12 @@ export default function Game() {
         </nav>
 
         {/* Zone centrale */}
-        <main className="flex-grow flex items-center justify-center">
+        <main className="flex-grow flex items-center justify-center" role="main" aria-label="Contenu principal obstetrix – Jeu">
           <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden my-6 p-6">
-            {/* Bannière de jeu (optionnelle) */}
+            {/* Bannière de jeu */}
             <div
               className="w-full h-64 relative bg-cover bg-center"
-              style={{ backgroundImage: "url('/your-image-path.jpeg')", backgroundPosition: "50% 30%" }}
+              style={{ backgroundImage: "url('/banniereobstetrix.jpg')", backgroundPosition: "50% 30%" }}
             >
               <div className="absolute inset-0 bg-black opacity-50"></div>
               <h1 className="relative text-4xl md:text-5xl font-bold text-white text-center pt-20">
@@ -339,18 +342,16 @@ export default function Game() {
               </h1>
             </div>
 
-            {/* Formulaires et contenu du jeu */}
-            <main>
-              {/* Formulaire de mot-clé en premier */}
+            {/* Contenu du jeu */}
+            <main className="mt-6">
+              {/* Formulaire de mot-clé */}
               <form onSubmit={handleKeywordSubmit} className="mb-6">
                 <input
                   type="text"
                   value={keywordInput}
                   onChange={(e) => setKeywordInput(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === " ") {
-                      e.preventDefault();
-                    }
+                    if (e.key === " ") e.preventDefault();
                   }}
                   placeholder="Entrez un mot-clé..."
                   className="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-300"
@@ -358,7 +359,7 @@ export default function Game() {
                 />
                 <button
                   type="submit"
-                  className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-transform transform hover:scale-105"
+                  className="w-full py-3 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring"
                 >
                   Valider le mot-clé
                 </button>
@@ -371,14 +372,14 @@ export default function Game() {
                 </p>
               </div>
 
-              {/* Formulaire de réponse en second, avec tooltip indiquant le nombre de lettres */}
+              {/* Formulaire de réponse */}
               {!frozen && (
                 <form onSubmit={handleAnswerSubmit} className="mb-6">
                   <input
                     type="text"
                     value={answerInput}
                     onChange={(e) => setAnswerInput(e.target.value)}
-                    placeholder="Entre le nom de la maladie..."
+                    placeholder="Entrez le nom de la maladie..."
                     title={`La maladie contient ${letterCount} lettres`}
                     className="w-full p-3 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-300"
                     required
@@ -386,8 +387,8 @@ export default function Game() {
                   <button
                     type="submit"
                     className={`w-full py-3 rounded-lg transition-transform transform hover:scale-105 text-white ${
-                      isChallenge ? "bg-purple-500 hover:bg-purple-600" : "bg-indigo-500 hover:bg-indigo-600"
-                    }`}
+                      isChallenge ? "bg-purple-700 hover:bg-purple-800" : "bg-indigo-700 hover:bg-indigo-800"
+                    } focus:outline-none focus:ring`}
                   >
                     Valider ma réponse
                   </button>
@@ -419,7 +420,7 @@ export default function Game() {
                     <div className="mt-4">
                       <Link
                         href={targetLink}
-                        className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 inline-block transition-transform transform hover:scale-105"
+                        className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-800 inline-block transition-transform transform hover:scale-105 focus:outline-none focus:ring"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -437,7 +438,7 @@ export default function Game() {
                     <div className="mt-4">
                       <Link
                         href={targetLink}
-                        className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 inline-block transition-transform transform hover:scale-105"
+                        className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-800 inline-block transition-transform transform hover:scale-105 focus:outline-none focus:ring"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
@@ -452,19 +453,19 @@ export default function Game() {
                 <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 mb-6">
                   <button
                     onClick={handleHint}
-                    className="w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-transform transform hover:scale-105"
+                    className="w-full py-3 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring"
                   >
                     Indice
                   </button>
                   <button
                     onClick={handleShowAnswer}
-                    className="w-full py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-transform transform hover:scale-105"
+                    className="w-full py-3 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring"
                   >
                     Réponse
                   </button>
                   <button
                     onClick={handleNewGame}
-                    className="w-full py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-transform transform hover:scale-105"
+                    className="w-full py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-transform transform hover:scale-105 focus:outline-none focus:ring"
                   >
                     Nouvelle partie
                   </button>
@@ -474,7 +475,6 @@ export default function Game() {
           </div>
         </main>
       </div>
-      {/* Footer commun */}
       <Footer />
     </Background>
   );
