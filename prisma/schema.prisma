@@ -58,7 +58,7 @@ model KeywordSubmission {
 }
 
 enum TrainingYear {
-  DCEM
+  DFGSM
   DFASM1
   DFASM2
   DFASM3

@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 
 export type TrainingYearOption =
-  | "DCEM"
+  | "DFGSM"
   | "DFASM1"
   | "DFASM2"
   | "DFASM3"
