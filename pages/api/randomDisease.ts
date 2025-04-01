@@ -12,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Construire le filtre si une spécialité est fournie
     const filter = specialtyStr
-      ? { specialties: { some: { name: { equals: specialtyStr, mode: 'insensitive' } } } }
+      ? { specialties: { some: { name: { equals: specialtyStr, mode: 'insensitive' as const } } } }
       : {};
 
     // Récupérer toutes les maladies correspondant au filtre
