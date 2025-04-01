@@ -1,12 +1,11 @@
-// prisma/schema.prisma
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "windows"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -19,12 +18,29 @@ model User {
 }
 
 model Disease {
-  id                 String      @id @default(uuid())
-  name               String      @unique
-  keywords           String[]    // Tableau de mots clés associés à la maladie
-  keywordsembedding  Json?       // Stocke l'embedding (généré à partir des mots clés)
-  link               String?     // Lien vers le chapitre du référentiel
-  specialties        Specialty[] @relation("DiseaseSpecialties")
+  id                String        @id @default(uuid())
+  name              String        @unique
+  keywords          String[]
+  synonyms          Json? // Objet JSON : { [keyword: string]: string[] }
+  startingKeyword   String?
+  keywordsembedding Json?
+  link              String?
+  specialties       Specialty[]   @relation("DiseaseSpecialties")
+  gameSessions      GameSession[]
+}
+
+model GameSession {
+  id                 String              @id @default(uuid())
+  user               User?               @relation(fields: [userId], references: [id])
+  userId             String?
+  diseaseId          String
+  disease            Disease             @relation(fields: [diseaseId], references: [id])
+  mode               String // "challenge" ou "libre"
+  success            Boolean             @default(false)
+  timeSpent          Int?
+  createdAt          DateTime            @default(now())
+  trainingYear       String
+  keywordSubmissions KeywordSubmission[]
 }
 
 model Specialty {
@@ -33,13 +49,20 @@ model Specialty {
   diseases Disease[] @relation("DiseaseSpecialties")
 }
 
-model GameSession {
-  id         String   @id @default(uuid())
-  user       User?    @relation(fields: [userId], references: [id])
-  userId     String?
-  diseaseId  String
-  mode       String   // "challenge" ou "libre"
-  success    Boolean  @default(false)
-  timeSpent  Int?     // durée en secondes (facultatif)
-  createdAt  DateTime @default(now())
+model KeywordSubmission {
+  id            String      @id @default(uuid())
+  gameSessionId String
+  keyword       String
+  createdAt     DateTime    @default(now())
+  gameSession   GameSession @relation(fields: [gameSessionId], references: [id])
+}
+
+enum TrainingYear {
+  DCEM
+  DFASM1
+  DFASM2
+  DFASM3
+  INTERNES
+  DOCTEUR
+  AUTRE
 }

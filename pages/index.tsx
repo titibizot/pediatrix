@@ -1,14 +1,27 @@
 // pages/index.tsx
 import React, { useState } from "react";
-import Head from "next/head"; // Pour ajouter une balise <title>
+import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 import Background from "../components/Background";
 import Banner from "../components/Banner";
 import Footer from "../components/Footer";
+import { useRouter } from "next/router";
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const router = useRouter();
+
+  // Gestionnaire d'accès administrateur
+  const handleAdminAccess = () => {
+    const code = window.prompt("Entrez le code d'accès administrateur:");
+    if (code === "UPSEnseignant") {
+  localStorage.setItem("adminAccess", "true");
+  router.push("/admin");
+} else {
+  window.alert("Code incorrect !");
+}
+  };
 
   return (
     <Background backgroundImage="/fonddiagnostix.jpeg">
@@ -25,7 +38,7 @@ export default function Home() {
                 <a className="flex items-center cursor-pointer focus:outline-none focus:ring">
                   <Image
                     src="/logodiagnostix.jpg"
-                    alt=""
+                    alt="Logo Diagnostix"
                     width={80}
                     height={80}
                     className="object-cover rounded-full"
@@ -104,7 +117,7 @@ export default function Home() {
         >
           <div className="bg-white bg-opacity-90 rounded-lg p-8 shadow-md text-center max-w-4xl mx-auto">
             <h1 className="text-4xl md:text-5xl font-bold text-blue-900 mb-6">
-              Bienvenue sur Diagnostix
+             Bienvenue sur Diagnostix
             </h1>
             <p className="mb-4 text-2xl md:text-3xl text-gray-800 text-lg leading-relaxed">
               <strong>Chère joueuse, cher joueur</strong>
@@ -170,10 +183,13 @@ export default function Home() {
                 </a>
               </Link>
             </div>
-            <div className="mt-8">
-              <p className="text-gray-800 text-lg leading-relaxed">
-                Découvrez dès maintenant le défi et mettez vos connaissances à l'épreuve !
-              </p>
+            {/* Bouton Accès Bonus et Accès Administrateur */}
+            <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mt-8">
+              <Link href="/Bonus/game" legacyBehavior>
+                <a className="px-4 py-2 bg-purple-700 text-white rounded hover:bg-purple-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring">
+                  Mode entrainement BONUS
+                </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -243,7 +259,27 @@ export default function Home() {
           </div>
         </div>
       </div>
+	  <div className="container mx-auto py-4 px-4">
+          <div className="text-center">
+            <button
+              onClick={handleAdminAccess}
+              className="px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring"
+            >
+              Accès administrateur
+            </button>
+          </div>
+        </div>
       <Footer />
     </Background>
   );
+}
+
+function handleAdminAccess() {
+  const code = window.prompt("Entrez le code d'accès administrateur :");
+  if (code === "UPSEnseignant") {
+    // Redirection vers la page admin, ici on utilise simplement location.href
+    window.location.href = "/admin";
+  } else {
+    window.alert("Code incorrect !");
+  }
 }

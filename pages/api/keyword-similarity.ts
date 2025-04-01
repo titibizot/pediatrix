@@ -1,4 +1,3 @@
-// pages/api/keyword-similarity.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import axios from 'axios';
 import { newStemmer } from 'snowball-stemmers';
@@ -7,11 +6,10 @@ import { newStemmer } from 'snowball-stemmers';
 const frenchStemmer = newStemmer("french");
 
 /**
- * Normalise un mot en préservant les 3 premiers caractères et en appliquant
- * la transformation (stemmatisation, suppression d'accents, etc.) uniquement sur le reste.
+ * Normalise un mot en supprimant espaces, ponctuation et accents, puis applique le stemming sur le suffixe.
  */
 function normalizeWord(word: string): string {
-  const cleaned = word.replace(/[-’' ]/g, "");
+  const cleaned = word.replace(/[-’',;:.!? ]/g, "");
   const normalized = cleaned.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const prefixLength = 3;
   if (normalized.length <= prefixLength) {
@@ -23,6 +21,9 @@ function normalizeWord(word: string): string {
   return prefix + stemmedSuffix;
 }
 
+/**
+ * Calcule la similarité cosinus entre deux vecteurs.
+ */
 function cosineSimilarity(vecA: number[], vecB: number[]): number {
   const dotProduct = vecA.reduce((acc, val, i) => acc + val * vecB[i], 0);
   const normA = Math.sqrt(vecA.reduce((acc, val) => acc + val * val, 0));
@@ -35,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ message: "Méthode non autorisée" });
   }
 
-  const { word, targetKeywords } = req.body;
+  const { word, targetKeywords, targetSynonyms } = req.body;
   if (!word || !targetKeywords || !Array.isArray(targetKeywords) || targetKeywords.length === 0) {
     return res.status(400).json({ message: "Paramètres manquants : 'word' et 'targetKeywords' sont requis." });
   }
@@ -45,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   let bestKeyword: string | null = null;
   let foundExact = false;
 
-  // Pour les mots de 3 lettres ou moins, on ne fait qu'une comparaison stricte
+  // --- 1. Vérification des mots-clés originaux ---
   if (normalizedStudentWord.length <= 3) {
     for (const keyword of targetKeywords) {
       const normalizedKeyword = normalizeWord(keyword);
@@ -57,7 +58,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
   } else {
-    // Pour les mots plus longs, on vérifie l'égalité ou l'inclusion dans l'un ou l'autre sens
     for (const keyword of targetKeywords) {
       const normalizedKeyword = normalizeWord(keyword);
       if (
@@ -82,6 +82,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 
+  // --- 2. Vérification des synonymes ---
+  // Extraction des synonymes (peut être un objet ou un tableau)
+  let synonymsArray: string[] = [];
+  if (targetSynonyms && typeof targetSynonyms === 'object') {
+    if (Array.isArray(targetSynonyms)) {
+      synonymsArray = targetSynonyms;
+    } else {
+      synonymsArray = Object.values(targetSynonyms)
+        .filter(arr => Array.isArray(arr))
+        .flat() as string[];
+    }
+  }
+
+  for (const syn of synonymsArray) {
+    const normalizedSyn = normalizeWord(syn);
+    if (normalizedStudentWord === normalizedSyn) {
+      return res.status(200).json({
+        similarity: 1.0,
+        bestKeyword: syn,
+        color: "orange",
+        message: `Correspondance exacte avec le synonyme "${syn}".`
+      });
+    }
+  }
+
+  // --- 3. Calcul par embeddings ---
   try {
     const studentResponse = await axios.post(
       "https://api.openai.com/v1/embeddings",

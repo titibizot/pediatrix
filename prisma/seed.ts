@@ -1,42 +1,79 @@
 import { PrismaClient } from '@prisma/client';
+import axios from 'axios';
 
 const prisma = new PrismaClient();
+const openAiApiKey = process.env.OPENAI_API_KEY;
+
+/**
+ * Génère automatiquement 3 à 5 synonymes médicaux pour un mot donné via l'API OpenAI Chat,
+ * en forçant que chaque synonyme soit constitué d'un seul mot.
+ */
+async function generateSynonyms(keyword: string): Promise<string[]> {
+  try {
+    const prompt = `Tu es un professeur émérite en médecine, expert en terminologie médicale en français. Pour le terme "${keyword}", donne-moi 3 à 5 synonymes pertinents, chacun constitué d'un seul mot. Sépare-les par des virgules.`;
+    const data = {
+      model: "gpt-3.5-turbo",
+      messages: [
+        { role: "system", content: "Tu es un expert en terminologie médicale en français." },
+        { role: "user", content: prompt }
+      ],
+      max_tokens: 60,
+      temperature: 0.5,
+    };
+
+    const response = await axios.post("https://api.openai.com/v1/chat/completions", data, {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${openAiApiKey}`
+      }
+    });
+
+    const message: string = response.data.choices[0].message.content;
+    // Découper la réponse par virgule, nettoyer et ne garder que les synonymes composés d'un seul mot.
+    return message
+      .split(',')
+      .map(s => s.trim().toLowerCase())
+      .filter(s => s.length > 0 && !s.includes(" "));
+  } catch (error: any) {
+    console.error(`Erreur pour générer des synonymes pour "${keyword}" :`, error.response?.data || error.message);
+    return [];
+  }
+}
 
 async function main() {
-  // Supprimez toutes les entrées existantes dans la table Disease
-  
   // Exemple de données de seed
   const diseases = [
     {
-      name: "Bronchiolite",
-        keywords: [
-          "toux", "fièvre", "dyspnée", "sifflements", "Nourrisson",
-          "mucus", "Virus", "crépitants", "pneumologie",
-          "apnée", "irritabilité", "Sibilants", "hypoxémie", "tachypnée",
-          "Détresse", "broncho", "inflammation", "sevrage", "Infection",
-          "ventilation", "sibilants", "régurgitations", "dyspnée",
-          "rétraction", "Oxygène", "infection", "bactéries", "viraux", "antibiotiques",
-          "épidémie", "réanimation", "Respiratoire", "Hiver", "Contagion", 
-		  "VRS", "alvéole", "bronches", "rhinite", "Bronchodilatateur", "désaturation",
-		  "cyanose", "rhinovirus"
-        ],
-        link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/pneumologie-cardiologie/bronchiolite-aigue-du-nourrisson",
-		specialties: {
-      connectOrCreate: [
-        {
-          where: { name: "pediatrie" },
-          create: { name: "pediatrie" },
-        },
-        {
-          where: { name: "pneumologie" },
-          create: { name: "pneumologie" },
-        },
-		{
-          where: { name: "infectiologie" },
-          create: { name: "infectiologie" },
-        }
-      ]
-	}
+  name: "Bronchiolite",
+  keywords: [
+    "toux", "fièvre", "dyspnée", "sifflements", "Nourrisson",
+    "mucus", "Virus", "crépitants", "pneumologie",
+    "apnée", "irritabilité", "Sibilants", "hypoxémie", "tachypnée",
+    "Détresse", "broncho", "inflammation", "sevrage", "Infection",
+    "ventilation", "sibilants", "régurgitations", "dyspnée",
+    "rétraction", "Oxygène", "infection", "bactéries", "viraux", "antibiotiques",
+    "épidémie", "réanimation", "Respiratoire", "Hiver", "Contagion", 
+    "VRS", "alvéole", "bronches", "rhinite", "Bronchodilatateur", "désaturation",
+    "cyanose", "rhinovirus"
+  ],
+  startingKeyword: "dyspnée", 
+  link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/pneumologie-cardiologie/bronchiolite-aigue-du-nourrisson",
+  specialties: {
+    connectOrCreate: [
+      {
+        where: { name: "pediatrie" },
+        create: { name: "pediatrie" },
+      },
+      {
+        where: { name: "pneumologie" },
+        create: { name: "pneumologie" },
+      },
+      {
+        where: { name: "infectiologie" },
+        create: { name: "infectiologie" },
+      }
+    ]
+  }
 },
       {
         name: "Otite",
@@ -49,6 +86,7 @@ async function main() {
           "audition", "irritabilité", "surdité", "cholestéatome",
           "récurrence", "hyperalgie", "aérateurs", "streptocoque", "pneumocoque", "eustache"
         ],
+		  startingKeyword: "douleur", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/otites",
         specialties: {
       connectOrCreate: [
@@ -79,6 +117,7 @@ async function main() {
 		  "antispasmodique", "probiotiques", "hypovolémie", "Antidiarrhéique", "selles", 
 		  "dysentérie", "selles"
         ],
+		  startingKeyword: "vomissement", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/diarrhee-aigue",
         specialties: {
       connectOrCreate: [
@@ -108,6 +147,7 @@ async function main() {
           "Échographie", "Abcès", "Anorexie", "Péritoine",
           "Bactérie", "Péritonite", "gastroentérologie"
         ],
+		  startingKeyword: "vomissement", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/gastroenterologie-nutrition-chirurgie-abdomino-pelvienne/douleurs-abdominopelviennes",
         specialties: {
       connectOrCreate: [
@@ -137,6 +177,7 @@ async function main() {
           "Température", "Hyperthermie", "Fièvre", "Crachat",
           "Pleurésie", "Lobaire", "Alvéole", "Dyspnée"
         ],
+		  startingKeyword: "dyspnée", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/pneumologie-cardiologie/pneumonies-aigues-communautaires",
         specialties: {
       connectOrCreate: [
@@ -165,6 +206,7 @@ async function main() {
           "Cétose", "Insulinémie", "Neuropathie", "Anticorps", "Glucagon",
           "Glucose", "Autocontrôle", "Cétonurie"
         ],
+		  startingKeyword: "AEG", 
         link: "https://www.pedia-univ.fr/node/247",
         specialties: {
       connectOrCreate: [
@@ -189,6 +231,7 @@ async function main() {
           "Encéphalite", "Septicémie", "Sepsis", "Virus", "Ponction",
           "Nourrisson", "Antibioprophylaxie", "Brudzinski", "Kernig", "Fulminans"
         ],
+		  startingKeyword: "fièvre", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/meningites-meningo-encephalites",
         specialties: {
       connectOrCreate: [
@@ -216,6 +259,7 @@ async function main() {
           "Adénopathie", "Érythème", "Cutané", "Rash", 
           "Conjonctive", "Échographie", "Immunoglobulines", "Hyperthermie", "Aspirine",
         ],
+		  startingKeyword: "fièvre", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/eruptions-febriles",
         specialties: {
       connectOrCreate: [
@@ -239,6 +283,7 @@ async function main() {
           "Néphropathie", "Hématurie", "Dialyse", "Hypertension", 
           "Protéines"
         ],
+		  startingKeyword: "oedème", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/nephrologie-chirurgie-urologique/proteinurie-syndrome-nephrotique-hematurie",
         specialties: {
       connectOrCreate: [
@@ -262,6 +307,7 @@ async function main() {
           "Cyanose", "Fièvre", "Lymphocytose", "Macrolides", 
           "Vaccination"
         ],
+		  startingKeyword: "toux", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/coqueluche",
         specialties: {
       connectOrCreate: [
@@ -290,6 +336,7 @@ async function main() {
           "Bronches", "Expectorations", "Dyspnée", "Tachypnée", "Désaturation",
 		  "Bronchodilatateur", "Spirométrie"
         ],
+		  startingKeyword: "dyspnée", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/pneumologie-cardiologie/asthme",
         specialties: {
       connectOrCreate: [
@@ -313,6 +360,7 @@ async function main() {
           "Fièvre", "Foetopathie", "Arthropathie", "Érythème", 
           "Surdité", "Malformation"
         ],
+		  startingKeyword: "éruption", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/eruptions-febriles",
         specialties: {
       connectOrCreate: [
@@ -340,6 +388,7 @@ async function main() {
           "Érythème", "Virémie", "Cicatrices", "Épidémie", 
           "Hyperthermie", "Cérébellite", "Surinfection", "Impetigo"
         ],
+		  startingKeyword: "éruption", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/eruptions-febriles",
         specialties: {
       connectOrCreate: [
@@ -367,6 +416,7 @@ async function main() {
           "Érythème", "Antibiotique", "Amoxicilline", "Rougeur", 
           "Ganglions", "Douleur", "Toxine", "température", "Streptatest", "rash"
         ],
+		  startingKeyword: "éruption", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/eruptions-febriles",
         specialties: {
       connectOrCreate: [
@@ -394,6 +444,7 @@ async function main() {
           "Fièvre", "Macules", "Papules", "Érythème", "Dermatologie",
           "Immunoglobulines", "Exanthème", "Température", "lymphadénopathie"
         ],
+		  startingKeyword: "éruption", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/eruptions-febriles",
         specialties: {
       connectOrCreate: [
@@ -421,6 +472,7 @@ async function main() {
           "Fièvre", "Macules", "Papules", "Érythème", 
           "Polyarthrite", "Exanthème", "Température", "Anémie", "Erythroblastopénie"
         ],
+		 startingKeyword: "éruption", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/eruptions-febriles",
         specialties: {
       connectOrCreate: [
@@ -447,6 +499,7 @@ async function main() {
           "Cutané", "Fièvre", "Macules", "Papules", "Érythème", 
           "Rhinite", "Exanthème", "Température"
         ],
+		 startingKeyword: "éruption", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/eruptions-febriles",
         specialties: {
       connectOrCreate: [
@@ -474,6 +527,7 @@ async function main() {
           "Folates", "Malabsorption", "Normocytaire", "Microcytaire", "Macrocytaire",
 		  "Hémolyse", "Ferriprive", "Myélodysplasie", "thalassémie", "drépanocytose"
         ],
+		 startingKeyword: "hémoglobine", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/hematologie-cancerologie/anemie-pathologies-du-fer",
         specialties: {
       connectOrCreate: [
@@ -497,6 +551,7 @@ async function main() {
           "Intolérance", "Allaitement", "IgE", "Eczéma", "Croissance",
 		  "Urticaire", "Réintroduction", "Exclusion"
         ],
+		 startingKeyword: "diarrhée", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/pneumologie-cardiologie/hypersensibilites-allergies",
         specialties: {
       connectOrCreate: [
@@ -520,6 +575,7 @@ async function main() {
           "Pli", "Syndrome", "X", "Mutation", "Fertilité",
 		  "Oedèmes", "Caryotype", "Congénital"
         ],
+		 startingKeyword: "génétique", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/croissance-developpement/chapitre-1-items-53-243-croissance-normale-pathologique",
         specialties: {
       connectOrCreate: [
@@ -543,6 +599,7 @@ async function main() {
           "Intolérance", "Asthénie", "Carence", "Villosités", "Croissance",
 		  "Anémie", "Inflammation", "Histologie", "Endoscopie", "selles", "absorption"
         ],
+		 startingKeyword: "diarrhée", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/gastroenterologie-nutrition-chirurgie-abdomino-pelvienne/diarrhee-chronique",
         specialties: {
       connectOrCreate: [
@@ -566,6 +623,7 @@ async function main() {
           "Anticonvulsivant", "Tonico-clonique", "Clonies", "Déficit", "Développement",
 		  "Fièvre"
         ],
+		 startingKeyword: "neurologie", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/neurologie/convulsions-crises-depilepsie-epilepsie",
         specialties: {
       connectOrCreate: [
@@ -588,6 +646,7 @@ async function main() {
           "Ralentissement", "Fécalome", "Biopsie", "Transit", "Perforation", 
           "Selles", "Nerf", "Ganglionnaire", "Dilatation"
         ],
+		 startingKeyword: "chirurgie", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/gastroenterologie-nutrition-chirurgie-abdomino-pelvienne/constipation",
         specialties: {
       connectOrCreate: [
@@ -610,6 +669,7 @@ async function main() {
           "Oedèmes", "Arthralgie", "Biopsie", "Cutané", "IgA", 
           "Hématome", "Invagination", "Hyperalgie", "Eruption"
         ],
+		 startingKeyword: "éruption", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/hematologie-cancerologie/purpura",
         specialties: {
       connectOrCreate: [
@@ -634,6 +694,7 @@ async function main() {
 		  "Hémolyse", "Splénectomie", "Mutation", "Articulation", "AVC",
 		  "STA", "Ischémie", "Vasculaire"
         ],
+		 startingKeyword: "hémoglobine", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/hematologie-cancerologie/anemie-pathologies-du-fer",
         specialties: {
       connectOrCreate: [
@@ -657,6 +718,7 @@ async function main() {
           "Sécrétion", "Mutation", "Stéatorrhée", "Bronchiectasie", "CFTR",
 		  "Colonisation", "Hypochlorémie", "Dépistage"
         ],
+		 startingKeyword: "dyspnée", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/pneumologie-cardiologie/specificites-maladies-genetiques-propos-dune-maladie-genique-mucoviscidose",
         specialties: {
       connectOrCreate: [
@@ -683,6 +745,7 @@ async function main() {
           "Thyroide", "Hormone", "Glande", "T3", "Bradycardie", 
           "Poids", "Constipation", "Hypométabolisme", "Athyréose", "Endocrinien"
         ],
+		 startingKeyword: "hormone", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/neonatologie/prise-charge-du-nouveau-ne",
         specialties: {
       connectOrCreate: [
@@ -705,6 +768,7 @@ async function main() {
           "Articulation", "Acétabulum", "Douleur", "Asymétrie", "Subluxation", 
           "Malformation", "Rotation", "Néonatal"
         ],
+		 startingKeyword: "congénital", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/croissance-developpement/depistages-lenfant",
         specialties: {
       connectOrCreate: [
@@ -728,6 +792,7 @@ async function main() {
           "Pyurie", "Dysurie", "Cystite", "Septicémie", "Uropathie", "Hématurie",
 		  "Abcès", "Antibiothérapie"
         ],
+		 startingKeyword: "fièvre", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/infections-urinaires",
         specialties: {
       connectOrCreate: [
@@ -755,6 +820,7 @@ async function main() {
           "Kingella", "SYnovite", "Epanchement", "CRP", "Septique", "Arthralgie",
 		  "IRM", "Antibiothérapie"
         ],
+		 startingKeyword: "fièvre", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/urgences-reanimation-chirurgie-orthopedique/boiteries-infections-osteoarticulaires",
         specialties: {
       connectOrCreate: [
@@ -782,6 +848,7 @@ async function main() {
           "Kingella", "Ostéite", "Epanchement", "CRP", "Septique", "Abcès",
 		  "IRM", "Antibiothérapie", "Sepsis"
         ],
+		 startingKeyword: "fièvre", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/urgences-reanimation-chirurgie-orthopedique/boiteries-infections-osteoarticulaires",
         specialties: {
       connectOrCreate: [
@@ -809,6 +876,7 @@ async function main() {
           "Néphropathie", "Hématurie", "Dialyse", "Hypertension", 
           "Protéines", "Anticorps"
         ],
+		 startingKeyword: "rein", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/nephrologie-chirurgie-urologique/proteinurie-syndrome-nephrotique-hematurie",
         specialties: {
       connectOrCreate: [
@@ -831,6 +899,7 @@ async function main() {
           "Détresse", "Dyspnée", "Respiration", "Obstruction", "Gonflement",
           "Adrénaline", "Larynx", "Muqueuse", "Inspiratoire"
         ],
+		 startingKeyword: "toux", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/pneumologie-cardiologie/detresse-respiratoire-aigue",
         specialties: {
       connectOrCreate: [
@@ -857,6 +926,7 @@ async function main() {
           "LCR", "Herpès", "Hallucinations", "EEG", "LCR",
           "Vomissements", "IRM", "Electroencéphalogramme", "Méninges"
         ],
+		 startingKeyword: "fièvre", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/meningites-meningo-encephalites",
         specialties: {
       connectOrCreate: [
@@ -885,6 +955,7 @@ async function main() {
           "Protéines", "Transplantation", "Calcémie", "Hypocalcémie", "Déshydratation", 
 		  "Fonctionnelle", "Glomérule"
         ],
+		 startingKeyword: "rein", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/nephrologie-chirurgie-urologique/insuffisance-renale-aigue-maladie-renale-chronique",
         specialties: {
       connectOrCreate: [
@@ -912,6 +983,7 @@ async function main() {
           "Diurétique", "Cardiaque", "Angiotensine", "Hyperaldostéronisme", 
           "Surrénales"
         ],
+		 startingKeyword: "rein", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/nephrologie-chirurgie-urologique/hypertension-arterielle",
         specialties: {
       connectOrCreate: [
@@ -935,6 +1007,7 @@ async function main() {
           "MDPH", "Lunaire", "Surdité", "Mutation", "Déficit",
 		  "Comportemental", "Caryotype", "Congénital"
         ],
+		 startingKeyword: "congénital", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/enfant-vulnerable-genetique/trisomie-21",
         specialties: {
       connectOrCreate: [
@@ -959,6 +1032,7 @@ async function main() {
 		  "Comportemental", "Caryotype", "Congénital", "Stéréotypies", "Microdélétion",
 		  "Déficience"
         ],
+		 startingKeyword: "congénital", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/enfant-vulnerable-genetique/syndrome-lx-fragile",
         specialties: {
       connectOrCreate: [
@@ -983,6 +1057,7 @@ async function main() {
 		  "Bradycardie", "Ostéoporose", "Hypoglycémie", "Boulimie", "Pyschose",
 		  "Déficience"
         ],
+		 startingKeyword: "vomissements", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/medecine-ladolescent-0/troubles-conduites-alimentaires-ladolescent",
         specialties: {
       connectOrCreate: [
@@ -1007,6 +1082,7 @@ async function main() {
 		  "Angoisse", "Désespoir", "Toxicité", "Médicaments", "Paracétamol",
 		  "Traumatisme", "Récurrence"
         ],
+		 startingKeyword: "Intoxication", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/medecine-ladolescent-0/risque-conduite-suicidaires-lenfant-ladolescent",
         specialties: {
       connectOrCreate: [
@@ -1032,6 +1108,7 @@ async function main() {
           "Nécrose", "Bacille", "Koch", "Crachat",
           "Miliaire", "Pneumonie"
         ],
+		 startingKeyword: "toux", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/pneumologie-cardiologie/tuberculose",
         specialties: {
       connectOrCreate: [
@@ -1058,6 +1135,7 @@ async function main() {
           "Strepto A", "Déglutition", "Contagion", "Rougeur", "Amygdales",
           "Gonflement", "Odynophagie", "Muqueuse", "Streptatest"
         ],
+		 startingKeyword: "fièvre", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/angines",
         specialties: {
       connectOrCreate: [
@@ -1084,6 +1162,7 @@ async function main() {
           "Rhinorrhée", "Frontal", "Contagion", "Maxillaire", "Purulent",
           "Streptocoque", "Ethmoidite", "Température", "Hyperthermie"
         ],
+		 startingKeyword: "fièvre", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/sinusites",
         specialties: {
       connectOrCreate: [
@@ -1112,6 +1191,7 @@ async function main() {
 		  "Parasitémie", "Coma", "Ictère", "Convulsion", "Diarrhée",
 		  "Antipaludique", "Hématologie"
         ],
+		 startingKeyword: "fièvre", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/pathologies-infectieuses-du-migrant-lenfant-voyageur",
         specialties: {
       connectOrCreate: [
@@ -1135,6 +1215,7 @@ async function main() {
           "Eruption", "Bulles", "Pustules", "Surinfection",
 		  "Peau", "Suppuration", "Démangeaisons", "Rougeurs", "Toxines"
         ],
+		 startingKeyword: "éruption", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/infectiologie/infections-cutanees-bacteriennes",
         specialties: {
       connectOrCreate: [
@@ -1162,6 +1243,7 @@ async function main() {
           "fibroscopie", "endoscopie", "nausées", "dyspepsie",
 		  "Inflammation", "Muqueuse", "Crise"
         ],
+		 startingKeyword: "vomissements", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/gastroenterologie-nutrition-chirurgie-abdomino-pelvienne/reflux-gastro-oesophagien-nourrisson-lenfant",
         specialties: {
       connectOrCreate: [
@@ -1185,6 +1267,7 @@ async function main() {
           "électrolytes", "ralentissement", "palpation", "hypertrophie",
 		  "gastrique", "abdominale", "échographie", "Digestion"
         ],
+		 startingKeyword: "vomissements", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/gastroenterologie-nutrition-chirurgie-abdomino-pelvienne/douleurs-abdominopelviennes",
         specialties: {
       connectOrCreate: [
@@ -1208,6 +1291,7 @@ async function main() {
           "Crise", "Hyperalgie", "palpation", "rectorragie",
 		  "gastrique", "abdominale", "échographie", "Digestion"
         ],
+		 startingKeyword: "douleur", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/gastroenterologie-nutrition-chirurgie-abdomino-pelvienne/douleurs-abdominopelviennes",
         specialties: {
       connectOrCreate: [
@@ -1231,6 +1315,7 @@ async function main() {
           "Crise", "Hyperalgie", "palpation", "infertilité",
 		  "échographie", "Digestion"
         ],
+		 startingKeyword: "douleur", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/gastroenterologie-nutrition-chirurgie-abdomino-pelvienne/douleurs-abdominopelviennes",
         specialties: {
       connectOrCreate: [
@@ -1254,6 +1339,7 @@ async function main() {
           "crural", "Hyperalgie", "prématurité",
 		  "échographie", "Digestion"
         ],
+		 startingKeyword: "douleur", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/gastroenterologie-nutrition-chirurgie-abdomino-pelvienne/pathologies-courantes-region-inguino-scrotale-du-penis",
         specialties: {
       connectOrCreate: [
@@ -1277,6 +1363,7 @@ async function main() {
           "Incompatibilité", "Hémoglobine", "Biliaires", "atrésie",
 		  "Cholestase", "echographie"
         ],
+		 startingKeyword: "néonatal", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/neonatologie/ictere-neonatal",
         specialties: {
       connectOrCreate: [
@@ -1297,6 +1384,7 @@ async function main() {
 		  "Hématopoièse", "Transfusion", "Rémission", "Adénopathie", "Hyperleucocytose",
 		  "Lymphome", "Aplasie"
         ],
+		 startingKeyword: "hémoglobine", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/hematologie-cancerologie/cancers",
         specialties: {
       connectOrCreate: [
@@ -1325,6 +1413,7 @@ async function main() {
 		  "Immunothérapie", "Nephrectomie", "Hypertension", "Adénopathie", "Séquelles",
 		  "Chirurgie"
         ],
+		 startingKeyword: "rein", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/hematologie-cancerologie/cancers",
         specialties: {
       connectOrCreate: [
@@ -1349,6 +1438,7 @@ async function main() {
 		  "Myocarde", "Coarctation", "Cardiomyopathie", "Hémodynamique", "ECG",
 		  "Sténose", "Hypertophique", "dilatée"
         ],
+		 startingKeyword: "néonatal", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/pneumologie-cardiologie/souffle-cardiaque",
         specialties: {
       connectOrCreate: [
@@ -1373,6 +1463,7 @@ async function main() {
 		  "Hyperlordose", "Neuromusculaire", "Courbure", "Douleur", "Fille",
 		  "Arthrodèse", "Gibbosité"
         ],
+		 startingKeyword: "orthopédie", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/croissance-developpement/depistages-lenfant",
         specialties: {
       connectOrCreate: [
@@ -1396,6 +1487,7 @@ async function main() {
           "Angoisse", "Stress", "Blessure", "Lésion","Stigmate",
 		  "Plainte"
         ],
+		 startingKeyword: "traumatisme", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/enfant-vulnerable-genetique/maltraitance",
         specialties: {
       connectOrCreate: [
@@ -1415,6 +1507,7 @@ async function main() {
           "FSH", "LH", "Androgènes", "Fertilité", "Endocrinien",
 		  "Echographie", "radiographie", "IRM"
         ],
+		 startingKeyword: "hormone", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/croissance-developpement/puberte-normale-pathologique",
         specialties: {
       connectOrCreate: [
@@ -1438,6 +1531,7 @@ async function main() {
           "Adrénaline", "déshydratation", "Hypophyse", "Aldostérone", "Tachycardie",
 		  "Hémodynamique", "COngénital", "Rénine", "Métabolisme", "Biopsie"
         ],
+		 startingKeyword: "hormone", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/endocrinologie-metabolisme/insuffisance-surrenale",
         specialties: {
       connectOrCreate: [
@@ -1461,6 +1555,7 @@ async function main() {
           "Gaz", "Détresse", "Cyanose", "Hypercapnie", "Vomissements",
 		  "Confusion", "Oxygène", "Saturation", "Respiration"
         ],
+		 startingKeyword: "intoxication", 
         link: "https://www.pedia-univ.fr/deuxieme-cycle/referentiel/urgences-reanimation-chirurgie-orthopedique/intoxications-aigues",
         specialties: {
       connectOrCreate: [
@@ -1981,6 +2076,7 @@ async function main() {
 		  "Pyrémithamine", "choriorétinite", "fond d'oeil", "séroconversion", "IgM", "Avidité",
 		  "microcéphalie", "séquelles", "séroconversion", "réactivation", "interruption", "IMG", "dépistage ophtalmique", "ETF", "gynécologie", "obstétrique", "parasitologie"
         ],
+			    startingKeyword: "virus",
         link:"",  
 		specialties: {
       connectOrCreate: [
@@ -2010,6 +2106,7 @@ async function main() {
           "latence", "neurone", "sensitif", "réactivation", "néonatal", "récurrence",
           "génital", "oral", "virus", "contact", "SNC", "fièvre", "kératite", "uvéite", "rétinite", "nerveux", "virus"
         ],
+			    startingKeyword: "virus",
         link:"",  
 		specialties: {
       connectOrCreate: [
@@ -2026,11 +2123,12 @@ async function main() {
           "enveloppé", "ADN", "respiratoire", "lésion", "transplacentaire",
           "accouchement", "vésicule", "méningite", "encéphalite", "SNC",
           "oculaire", "congénital", "fièvre", "hépatite", "aciclovir",
-          "valaciclovir", "foscarnet", "vaccin", "vivant", 
+          "valaciclovir", "foscarnet", "vaccin", "vivant", "éruption",
           "attenué", "cutanéo-muqueux", "LCS", "PCR", "varicelle",
           "zona", "latence", "réactivation", "récurrence",
           "kératite", "myélite", "oculaire", "post-zostérienne", "douleur", "nerveux", "virus", "virus"
         ],
+			    startingKeyword: "virus",
         link: "",
         specialties: {
       connectOrCreate: [
@@ -2056,6 +2154,7 @@ async function main() {
 		  "amnniocentèse", "Valaciclovir", "IRM", "hygiène",
 		  "sérologie", "IgG", "IgM", "Avidité", "microcéphalie", "séquelles", "séroconversion", "réactivation", "interruption", "IMG", "gynécologie", "obstétrique"
         ],
+			    startingKeyword: "virus",
         link: "",
         specialties: {
       connectOrCreate: [
@@ -2081,6 +2180,7 @@ async function main() {
           "salive", "syndrome", "PCR",
           "sérologie", "immunodéprimés", "primo-infection", "virus", "virus"
         ],
+			    startingKeyword: "virus",
         link: "",
         specialties: {
       connectOrCreate: [
@@ -2101,6 +2201,7 @@ async function main() {
           "condylome", "PCR", "génotype", "utérin",
           "acuminé", "vaccination", "sexuel", "virus", "HSH", "virus"
         ],
+			    startingKeyword: "virus",
         link: "",
         specialties: {
       connectOrCreate: [
@@ -2120,6 +2221,7 @@ async function main() {
           "aïgue", "fulminante", "voyage", "endémie", "zone", "cas", "contact", 
 	  "hépatopathie", "virus", "virus"
         ],
+			    startingKeyword: "virus",
         link: "",
         specialties: {
       connectOrCreate: [
@@ -2139,6 +2241,7 @@ async function main() {
           "HDV", "immunodépression", "monothérapie", "ténofovir", "entécavir", "polymérase", "cancer", "IgG", "IgM",
 	  "nucléotidique", "virus", "nucléosidique", "inhibiteur", "cccDNA", "super-enroulé", "hépatique", "traitement", "analogue", "virus"
 	  ],
+	  	    startingKeyword: "virus",
         link: "",
         specialties: {
       connectOrCreate: [
@@ -2157,6 +2260,7 @@ async function main() {
           "immunodépression", "polymérase", "association", "antiviraux", "protéase", "génotype", "transfusion",
 	  "virus", "inhibiteur", "cccDNA", "AAD", "guérison", "cryoglobulinémie", "hépatique", "traitement", "cancer", "analogue", "virus"
 	  ],
+	  	    startingKeyword: "virus",
         link: "",
         specialties: {
       connectOrCreate: [
@@ -2176,6 +2280,7 @@ async function main() {
 	  "polymérase", "analogue", "cccDNA", "AAD", "guérison", "cryoglobulinémie", "hépatique", "traitement", "sang", "selles", "PCR",
 	  "sérologie", "IgG", "IgM", "immunodéprimés", "hépatopathie", "endémie", "zone", "hydrique", "eau", "virus"
 	  ],
+	  	    startingKeyword: "virus",
         link: "",
         specialties: {
       connectOrCreate: [
@@ -2195,6 +2300,7 @@ async function main() {
           "SNC", "méningite", "antivirale", "virus", "sérologie", "charge", "virale", "ELISA", "western blot", "p24", "indétectable", "immunodéprimés", "immunodéficience",
 		  "polymérase", "analogue", "traitement", "virus"
 	  ],
+	    startingKeyword: "virus",
         link: "",
         specialties: {
       connectOrCreate: [
@@ -2212,6 +2318,7 @@ async function main() {
 	  "PCR", "test", "antigénique", "déshydratation", "fièvre", "douleurs", "enfants", "pediatrie", "enfance", "nourrisson", "nouveau-né", "soluté", "SRO", 
 	  "réhydratation", "orale", "réinfection", "génotype", "virus"
 	  ],
+	  	    startingKeyword: "virus",
         link: "",
         specialties: {
       connectOrCreate: [
@@ -2229,6 +2336,7 @@ async function main() {
 	  "PCR", "test", "antigénique", "déshydratation", "fièvre", "douleurs", "réinfection", "TIAC", "toxi-infection", "gériatrie", "adulte", "SRO", 
 	  "réhydratation", "orale", "hydratation", "génotype", "virus"
 	  ],
+	  	    startingKeyword: "virus",
         link: "",
         specialties: {
       connectOrCreate: [
@@ -2246,6 +2354,7 @@ async function main() {
 	  "cardiopathie", "infection", "conjonctivite", "oculaire", "polio", "poliomyélite", "vaccin", "selles", "gorge", "LCS", "sang", "PCR", "paralysie", "flasque", "poliomyélite", "rhombencéphalite",
 	  "coxsackievirus", "pieds", "main", "bouche", "conjonctivite", "rhinite", "rhinopharyngite", "virus"
 	  ],
+	  	    startingKeyword: "virus",
         link: "",
         specialties: {
       connectOrCreate: [
@@ -2263,6 +2372,7 @@ async function main() {
           "monothérapie", "anticorps", "monoclonaux", "monoclonal", "inhibiteur", "protéase", "vaccin", "SARS", "COVID", "sars-cov-2", "PCR", "respiratoire", "MERS", "sars-cov-1", "arthralgies",
 	  "endémique", "mutation", "recombinaison", "rhinite", "rhinopharyngite", "défaillance", "détresse", "aiguë", "SDRA", "émergent", "zoonose", "sévère",  "antigénique", "test", "épidémie", "pandémie", "virus"
 	  ],
+	  	    startingKeyword: "virus",
         link: "",
         specialties: {
       connectOrCreate: [
@@ -2280,6 +2390,7 @@ async function main() {
           "neuraminidase", "monothérapie", "vaccin", "inhibiteur", "défaillance", "détresse", "aiguë", "SDRA", "émergent", "zoonose", "sévère", "mutation", "ponctuelle", "réassortiements", "cassure",
 	  "dérive", "glissement", "antigénique", "PCR", "test", "segment", "épidémie", "pandémie", "A", "B", "oiseaux", "porc", "humain", "hôte", "virus"	
 ],	  
+	    startingKeyword: "virus",
         link: "",
         specialties: {
       connectOrCreate: [
@@ -2296,7 +2407,8 @@ async function main() {
           "enveloppé", "ARN", "respiratoire", "manuportée", "fièvre", "infection", "douleurs", "articulaires", "musculaire", "myalgie", "bronchiolite", "syndrome", "arthralgies",
           "monothérapie", "vaccin", "nirsevimab", "défaillance", "détresse", "aiguë", "SDRA", "sévère", "mutation", "ponctuelle", "antigénique", "PCR", "test", "épidémie", "nourrissons",
 	  "nouveau-né", "virus", "anticorps", "monoclonaux",  "surinfection", "insuffisance", "apnée", "atélectasie", "pediatrie", "virus"
-	  ],	  
+	  ],
+	    startingKeyword: "virus",	  
         link: "",
         specialties: {
       connectOrCreate: [
@@ -2313,7 +2425,8 @@ async function main() {
           "enveloppé", "ARN", "respiratoire", "fièvre", "infection", "système", "nerveux", "adénopathies", "fièvre", "éruption", "cutanée", "maculopapuleux", "maculopapuleuse", "macule", "papule", "exanthème",
           "vaccin", "ROR", "vivant", "atténué", "sang", "salive", "PCR", "urine", "respiratoire", "LCS", "IgM", "IgG", "sérum", "sérologie", "catarrhe", "oculo-nasal", "contagieux", "arthralgies",
 	  "Köplik", "encéphalite", "PESS", "sclérosante",  "subaiguë", "pan-encéphalite"
-	  ],	  
+	  ],	
+	    startingKeyword: "virus",	  
         link: "",
         specialties: {
       connectOrCreate: [
@@ -2331,6 +2444,7 @@ async function main() {
 	  "articulaires", "musculaire", "myalgie", "arthralgies", "vaccin", "ROR", "vivant", "atténué", "sang", "salive", "PCR", "IgM", "IgG", "sérum", "sérologie", "amniotique", "liquide", "urine", "sang", "sérum", 
 	  "salive",  "surdité"
 	  ],
+	    startingKeyword: "virus",
         link: "",
         specialties: {
       connectOrCreate: [
@@ -2347,6 +2461,7 @@ async function main() {
           "enveloppé", "ARN", "vectorielle", "vectoriel", "infection", "moustique", "gastro-entérite", "fièvre", "éruption", "cutanée", "adénopathies", "hémorragique", "exanthème", "douleurs", 
 	  "articulaires", "musculaire", "myalgie", "arthralgies", "vaccin", "sang", "salive", "PCR", "IgM", "IgG", "sérum", "sérologie", "arthropode", "arbovirus", "aedes", "albopictus", "sérotype", "aegypti"
 	  ],
+	  	    startingKeyword: "virus",
         link: "",
         specialties: {
       connectOrCreate: [
@@ -2364,6 +2479,7 @@ async function main() {
 	  "articulaires", "musculaire", "myalgie", "arthralgies", "anémie", "sang", "moelle", "osseuse", "IgM", "IgG", "sérum", "sérologie", "cardiopathie", "congénital", "liquide", "amniotique", "PCR", "sérologie",
 	  "IgG", "IgM", "mégalérythème", "épidémique", "macule", "papule", "paire", "claque", "maculopapuleux", "anasarque", "MFIU", "mort", "foetale", "in-utero", "drépanocytose", "hémoglobinopathie", "thalassémie"
 	  ],
+	    startingKeyword: "virus",
         link: "",
         specialties: {
       connectOrCreate: [
@@ -2375,15 +2491,71 @@ async function main() {
 	}
 	}
  ];
-  // Insérez les données en utilisant skipDuplicates pour éviter les erreurs si des doublons existent
-for (const disease of diseases) {
-  await prisma.disease.create({
-    data: disease,
-  });
+ 
+  for (const disease of diseases) {
+    // Vérifier si la maladie existe déjà et récupérer le champ synonyms
+    const existingDisease = await prisma.disease.findUnique({
+      where: { name: disease.name },
+      select: { synonyms: true }
+    });
 
-  console.log("Seed terminé");
+    let synonyms: { [keyword: string]: string[] } = {};
+    if (existingDisease && existingDisease.synonyms) {
+      synonyms = existingDisease.synonyms as { [keyword: string]: string[] };
+      console.log(`Utilisation des synonymes déjà existants pour ${disease.name}`);
+    } else {
+      for (const keyword of disease.keywords) {
+        if (keyword.length <= 3) {
+          synonyms[keyword] = [];
+        } else {
+          const generated = await generateSynonyms(keyword);
+          synonyms[keyword] = generated;
+          console.log(`Synonymes pour "${keyword}" de ${disease.name}:`, generated);
+          // Pause pour respecter les limites d'appel à OpenAI
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+      }
+    }
+
+    // Extraire le tableau des spécialités depuis disease.specialties.connectOrCreate
+    const specialtiesArray = disease.specialties && Array.isArray(disease.specialties.connectOrCreate)
+      ? disease.specialties.connectOrCreate
+      : [];
+
+    // Upsert de la maladie avec les synonymes générés
+    await prisma.disease.upsert({
+      where: { name: disease.name },
+      update: {
+        keywords: disease.keywords,
+        startingKeyword: disease.startingKeyword,
+        link: disease.link,
+        synonyms,
+        specialties: {
+          connectOrCreate: specialtiesArray.map((spec) => ({
+            where: { name: spec.where.name },
+            create: { name: spec.create.name },
+          })),
+        },
+      },
+      create: {
+        name: disease.name,
+        keywords: disease.keywords,
+        startingKeyword: disease.startingKeyword,
+        link: disease.link,
+        synonyms,
+        specialties: {
+          connectOrCreate: specialtiesArray.map((spec) => ({
+            where: { name: spec.where.name },
+            create: { name: spec.create.name },
+          })),
+        },
+      },
+    });
+
+    console.log(`Seed terminé pour la maladie ${disease.name}`);
+  }
 }
-}
+
 main()
   .catch((e) => {
     console.error(e);

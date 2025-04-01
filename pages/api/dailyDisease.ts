@@ -16,14 +16,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // Récupérer le paramètre de requête "specialty" (optionnel)
     const { specialty } = req.query;
-    // Si un paramètre est fourni, filtrer sur la relation specialties
-    const filter = specialty
-      ? { specialties: { some: { name: specialty.toString().toLowerCase() } } }
+    const specialtyStr = Array.isArray(specialty) ? specialty[0] : specialty;
+
+    // Construire le filtre de manière identique à randomDisease
+    const filter = specialtyStr
+      ? { specialties: { some: { name: { equals: specialtyStr, mode: 'insensitive' } } } }
       : {};
 
+    // Récupérer toutes les maladies correspondant au filtre, avec un ordre constant
     const diseases = await prisma.disease.findMany({
       where: filter,
-      orderBy: { name: 'asc' }  // Ordre constant
+      orderBy: { name: 'asc' }
     });
 
     if (!diseases.length) {
@@ -35,7 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const hash = hashString(today);
     const index = hash % diseases.length;
 
-    // Ajout de logs pour déboguer
+    // Logs de débogage
     console.log("Liste des maladies :", diseases.map(d => d.name));
     console.log("Date UTC:", today);
     console.log("Hash:", hash);

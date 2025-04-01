@@ -1,21 +1,25 @@
-// pages/Pediatrix/game.js
+// pages/game.js
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
 import Link from "next/link";
 import Image from "next/image";
-import Background from "../components/Background"; // Vérifie le chemin
+import Head from "next/head";
+import Background from "../components/Background";
 import Footer from "../components/Footer";
+import TrainingYearModal from "../components/TrainingYearModal";
 
 export default function Game() {
   const router = useRouter();
   const { mode } = router.query;
   const isLibre = mode === "libre";
   const isChallenge = mode === "challenge";
+
+  // États généraux
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [frozen, setFrozen] = useState(false);
 
-  // États de récupération de la maladie
+  // États de récupération de la maladie (pas de filtre par spécialité)
   const [dailyDisease, setDailyDisease] = useState(null);
   const [currentDisease, setCurrentDisease] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -28,10 +32,26 @@ export default function Game() {
   const [hints, setHints] = useState([]);
   const [correct, setCorrect] = useState(false);
 
-  // États pour le timer (mode libre)
+  // États pour le timer (mode Libre)
   const [duration, setDuration] = useState(0); // minutes
   const [timeLeft, setTimeLeft] = useState(0);   // secondes
   const [timerActive, setTimerActive] = useState(false);
+
+  // États pour le training year et la GameSession
+  const [trainingYear, setTrainingYear] = useState(null);
+  const [showTrainingModal, setShowTrainingModal] = useState(true);
+  const [sessionId, setSessionId] = useState(null);
+
+  // État pour le module de comptage de lettres
+  const [showLetterCount, setShowLetterCount] = useState(false);
+
+  // État pour l'affichage du startingKeyword
+  const [showStartingKeyword, setShowStartingKeyword] = useState(true);
+
+  const handleTrainingYearSave = (year) => {
+    setTrainingYear(year);
+    setShowTrainingModal(false);
+  };
 
   // Réinitialisation lors du changement de mode
   useEffect(() => {
@@ -43,9 +63,10 @@ export default function Game() {
     setDuration(0);
     setTimeLeft(0);
     setTimerActive(false);
+    setSessionId(null);
     if (isChallenge) {
       const today = new Date().toISOString().split("T")[0];
-      const saved = localStorage.getItem("challengeCompleted_pediatrie");
+      const saved = localStorage.getItem("challengeCompleted_global");
       if (saved === today) {
         setFrozen(true);
         setFeedback("Vous avez déjà trouvé la réponse aujourd'hui. Attendez le renouvellement à minuit.");
@@ -62,7 +83,7 @@ export default function Game() {
     if (isChallenge) {
       setLoading(true);
       axios
-        .get("/api/dailyDisease?specialty=pediatrie")
+        .get("/api/dailyDisease")
         .then((res) => {
           console.log("Daily disease:", res.data);
           setDailyDisease(res.data);
@@ -80,7 +101,7 @@ export default function Game() {
     if (isLibre) {
       setLoading(true);
       axios
-        .get("/api/randomDisease?specialty=pediatrie")
+        .get("/api/randomDisease")
         .then((res) => {
           console.log("Random disease:", res.data);
           setCurrentDisease(res.data);
@@ -93,22 +114,30 @@ export default function Game() {
     }
   }, [isLibre]);
 
-  // Objet maladie par défaut
+  // Objet maladie par défaut (avec synonyms et startingKeyword)
   const defaultDisease = {
-    name: "Bronchiolite",
-    link: "https://referentiel-pediatrie.com/chapitres/bronchiolite",
-    keywords: ["détresse", "sifflements"],
+    name: "En chargement",
+    link: "#",
+    keywords: ["Chargement"],
+    synonyms: {},
+    startingKeyword: ""
   };
 
   // Sélection de la maladie
   const diseaseData = isChallenge ? dailyDisease : currentDisease;
-  const { name: targetDisease, link: targetLink, keywords: targetKeywords } =
-    diseaseData || defaultDisease;
+  const {
+    name: targetDisease,
+    link: targetLink,
+    keywords: targetKeywords,
+    synonyms: targetSynonyms,
+    startingKeyword
+  } = diseaseData || defaultDisease;
 
-  // Calcul du nombre de mots du nom de la maladie
   const diseaseWordCount = targetDisease.trim().split(/\s+/).length;
+  // Comptage des lettres (sans espaces)
+  const letterCount = targetDisease.replace(/\s/g, "").length;
 
-  // Timer (mode libre)
+  // Timer (mode Libre)
   useEffect(() => {
     if (isLibre && duration > 0) {
       setTimeLeft(duration * 60);
@@ -129,10 +158,27 @@ export default function Game() {
     return () => clearInterval(interval);
   }, [timeLeft, timerActive]);
 
-  // Tri de l'historique des mots-clés : ici on souhaite que les mots avec de meilleures correspondances apparaissent en haut.
-  // Par exemple, on peut définir "green" et "darkgreen" avec une valeur basse pour être triés en tête.
+  // Création de la GameSession en mode Libre dès que currentDisease et trainingYear sont définis
+  useEffect(() => {
+    if (isLibre && currentDisease && trainingYear && !sessionId) {
+      axios
+        .post("/api/createGameSession", {
+          diseaseId: currentDisease.id,
+          trainingYear: trainingYear,
+        })
+        .then((res) => {
+          console.log("Session créée :", res.data.gameSession);
+          setSessionId(res.data.gameSession.id);
+        })
+        .catch((err) => {
+          console.error("Erreur lors de la création de la session :", err);
+        });
+    }
+  }, [isLibre, currentDisease, trainingYear, sessionId]);
+
+  // Tri de l'historique des mots-clés avec l'ordre : vert, orange, rouge
   const sortedKeywordsHistory = [...keywordsHistory].sort((a, b) => {
-    const order = { green: 1, darkgreen: 1, orange: 2, red: 3 };
+    const order = { green: 1, orange: 2, red: 3 };
     return (order[a.color] || 4) - (order[b.color] || 4);
   });
 
@@ -154,7 +200,7 @@ export default function Game() {
     return array;
   };
 
-  // Gestionnaire du formulaire de mot-clé (empêche l'ajout d'espaces)
+  // Gestionnaire du formulaire de mot-clé (envoi de targetSynonyms)
   const handleKeywordSubmit = async (e) => {
     e.preventDefault();
     if (!keywordInput.trim()) return;
@@ -162,9 +208,17 @@ export default function Game() {
       const response = await axios.post("/api/keyword-similarity", {
         word: keywordInput,
         targetKeywords,
+        targetSynonyms,
       });
       const { color } = response.data;
       setKeywordsHistory((prev) => [...prev, { word: keywordInput, color }]);
+      // En mode Libre, enregistrer la soumission dans la GameSession
+      if (isLibre && sessionId) {
+        await axios.post("/api/keywordSubmissions", {
+          gameSessionId: sessionId,
+          keyword: keywordInput,
+        });
+      }
     } catch (error) {
       console.error(error);
     }
@@ -183,25 +237,18 @@ export default function Game() {
       else if (keywordCount < 15) grade = "Bon score 🙂";
       else if (keywordCount < 20) grade = "Pas mal 😐";
       else grade = "Tu feras mieux la prochaine fois 😞";
-      setFeedback(
-        `Bravo ! Vous avez trouvé la maladie : ${targetDisease} grâce à ${keywordCount} mot(s)-clés. ${grade}`
-      );
+      setFeedback(`Bravo ! Vous avez trouvé la maladie : ${targetDisease} grâce à ${keywordCount} mot(s)-clés. ${grade}`);
       setCorrect(true);
       if (isChallenge) {
         axios.post("/api/recordChallenge", {
           mode: "challenge",
           success: true,
-          // On utilise le nom comme identifiant (on suppose son unicité)
           diseaseId: diseaseData ? diseaseData.name : "inconnu"
         })
-        .then((res) => {
-          console.log("Session enregistrée :", res.data);
-        })
-        .catch((error) => {
-          console.error("Erreur lors de l'enregistrement de la session :", error);
-        });
+        .then((res) => console.log("Session enregistrée :", res.data))
+        .catch((error) => console.error("Erreur lors de l'enregistrement de la session :", error));
         const today = new Date().toISOString().split("T")[0];
-        localStorage.setItem("challengeCompleted_pediatrie", today);
+        localStorage.setItem("challengeCompleted_global", today);
         setFrozen(true);
       }
     } else {
@@ -228,7 +275,7 @@ export default function Game() {
   // Bouton Nouvelle Partie (mode Libre)
   const handleNewGame = () => {
     axios
-      .get("/api/randomDisease?specialty=pediatrie")
+      .get("/api/randomDisease")
       .then((res) => {
         console.log("Nouvelle maladie:", res.data);
         setCurrentDisease(res.data);
@@ -237,12 +284,20 @@ export default function Game() {
         setFeedback("");
         setHints([]);
         setCorrect(false);
+        setSessionId(null);
       })
       .catch((err) => console.error(err));
   };
 
   return (
     <Background backgroundImage="/fonddiagnostix.jpeg">
+      <Head>
+        <title>Diagnostix – Jeu</title>
+      </Head>
+      {/* Modal pour sélectionner l'année de formation */}
+      {showTrainingModal && (
+        <TrainingYearModal onSave={handleTrainingYearSave} />
+      )}
       <div className="relative z-30 min-h-screen flex flex-col">
         {/* Barre de navigation */}
         <nav className="bg-white shadow-md">
@@ -257,7 +312,6 @@ export default function Game() {
               />
               <span className="text-2xl font-bold text-blue-900">Diagnostix</span>
             </div>
-            {/* Liens de navigation pour desktop */}
             <div className="hidden sm:flex space-x-8">
               <Link href="/" legacyBehavior>
                 <a className="text-sm font-medium text-blue-900 hover:text-blue-800 focus:outline-none focus:ring">
@@ -279,7 +333,6 @@ export default function Game() {
                 </Link>
               )}
             </div>
-            {/* Bouton menu mobile */}
             <div className="sm:hidden ml-4">
               <button
                 type="button"
@@ -329,7 +382,7 @@ export default function Game() {
         {/* Zone centrale */}
         <main className="flex-grow flex items-center justify-center">
           <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden my-6 p-6">
-            {/* Bannière de jeu (optionnelle) */}
+            {/* Bannière de jeu */}
             <div
               className="w-full h-64 relative bg-cover bg-center"
               style={{ backgroundImage: "url('/your-image-path.jpeg')", backgroundPosition: "50% 30%" }}
@@ -340,141 +393,202 @@ export default function Game() {
               </h1>
             </div>
 
-            {/* Formulaires et contenu du jeu */}
-            <main>
-              {/* Formulaire de mot-clé en premier */}
-              <form onSubmit={handleKeywordSubmit} className="mb-6">
+            {/* Affichage du starting keyword (sur toutes les pages) */}
+            {startingKeyword && (
+              <div className="mt-4 mb-6 text-center">
+                {showStartingKeyword ? (
+                  <>
+                    <p className="text-lg text-gray-800">
+                      Mot clé de départ : <strong>{startingKeyword}</strong>
+                    </p>
+                    <button
+                      onClick={() => setShowStartingKeyword(false)}
+                      className="mt-2 px-3 py-1 bg-blue-700 text-white rounded hover:bg-blue-800 focus:outline-none focus:ring"
+                    >
+                      Masquer le mot clé de départ
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setShowStartingKeyword(true)}
+                    className="mt-2 px-3 py-1 bg-blue-700 text-white rounded hover:bg-blue-800 focus:outline-none focus:ring"
+                  >
+                    Afficher le mot clé de départ
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Timer et sélection de durée (mode Libre) */}
+            {isLibre && (
+              <div className="mb-6 flex flex-col sm:flex-row items-center justify-between">
+                <div>
+                  <label className="mr-2 font-medium text-gray-800">Durée de jeu :</label>
+                  <select
+                    value={duration}
+                    onChange={(e) => setDuration(parseInt(e.target.value))}
+                    className="border p-1 rounded focus:outline-none focus:ring"
+                  >
+                    <option value={0}>Choisir...</option>
+                    <option value={5}>5 minutes</option>
+                    <option value={10}>10 minutes</option>
+                    <option value={20}>20 minutes</option>
+                    <option value={30}>30 minutes</option>
+                  </select>
+                </div>
+                {timerActive && (
+                  <div className="mt-4 sm:mt-0">
+                    <span className="font-medium text-gray-800">Temps restant :</span>{" "}
+                    <strong className="text-indigo-700">{formatTime(timeLeft)}</strong>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Formulaire de mot-clé */}
+            <form onSubmit={handleKeywordSubmit} className="mb-6">
+              <input
+                type="text"
+                value={keywordInput}
+                onChange={(e) => setKeywordInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === " ") e.preventDefault();
+                }}
+                placeholder="Entrez un mot-clé..."
+                className="w-full p-3 border border-gray-400 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                required
+              />
+              <button
+                type="submit"
+                className="w-full py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring"
+              >
+                Valider le mot-clé
+              </button>
+            </form>
+
+            {/* Seconde partie de la page : affichage du nombre de mots et du module de compte de lettres, puis formulaire de réponse */}
+            <div className="mb-4 text-center">
+              <p className="text-sm text-gray-800">
+                La maladie contient : <strong>{diseaseWordCount} mot(s)</strong>
+              </p>
+              {isLibre && (
+                <div className="mt-2">
+                  <button
+                    onClick={() => setShowLetterCount(!showLetterCount)}
+                    className="px-3 py-2 bg-gray-800 text-white rounded hover:bg-gray-900 transition-transform transform hover:scale-105 focus:outline-none focus:ring"
+                  >
+                    {showLetterCount ? "Masquer le compte de lettres" : "Afficher le compte de lettres"}
+                  </button>
+                  {showLetterCount && (
+                    <p className="mt-2 text-sm text-gray-700">
+                      La maladie contient {letterCount} lettre{letterCount > 1 ? "s" : ""}.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Formulaire de réponse */}
+            {!frozen && (
+              <form onSubmit={handleAnswerSubmit} className="mb-6">
                 <input
                   type="text"
-                  value={keywordInput}
-                  onChange={(e) => setKeywordInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === " ") {
-                      e.preventDefault();
-                    }
-                  }}
-                  placeholder="Entrez un mot-clé..."
+                  value={answerInput}
+                  onChange={(e) => setAnswerInput(e.target.value)}
+                  placeholder="Entrez le nom de la maladie..."
                   className="w-full p-3 border border-gray-400 rounded-lg mb-3 focus:outline-none focus:ring focus:border-blue-800"
                   required
                 />
                 <button
                   type="submit"
-                  className="w-full py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring"
+                  className={`w-full py-3 rounded-lg transition-transform transform hover:scale-105 text-white ${
+                    isChallenge ? "bg-purple-700 hover:bg-purple-800" : "bg-indigo-700 hover:bg-indigo-800"
+                  } focus:outline-none focus:ring`}
                 >
-                  Valider le mot-clé
+                  Valider ma réponse
                 </button>
               </form>
+            )}
 
-              {/* Affichage du nombre de mots dans le nom de la maladie */}
-              <div className="mb-4">
-                <p className="text-sm text-gray-800">
-                  La maladie contient : <strong>{diseaseWordCount} mot(s)</strong>
-                </p>
-              </div>
+            <div className="mb-4 text-sm text-gray-800">
+              <span className="font-medium">Légende : </span>
+              <span className="text-red-800">Rouge</span> : Mot peu similaire,{" "}
+              <span className="text-orange-800">Orange</span> : Mot très proche,{" "}
+              <span className="text-green-800">Vert</span> : Mot exact.
+            </div>
 
-              {/* Formulaire de réponse en second */}
-              {!frozen && (
-                <form onSubmit={handleAnswerSubmit} className="mb-6">
-                  <input
-                    type="text"
-                    value={answerInput}
-                    onChange={(e) => setAnswerInput(e.target.value)}
-                    placeholder="Entre le nom de la maladie..."
-                    className="w-full p-3 border border-gray-400 rounded-lg mb-3 focus:outline-none focus:ring focus:border-blue-800"
-                    required
-                  />
-                  <button
-                    type="submit"
-                    className={`w-full py-3 rounded-lg transition-transform transform hover:scale-105 text-white ${
-                      isChallenge ? "bg-purple-700 hover:bg-purple-800" : "bg-indigo-700 hover:bg-indigo-800"
-                    } focus:outline-none focus:ring`}
-                  >
-                    Valider ma réponse
-                  </button>
-                </form>
-              )}
+            <div className="mb-6">
+              <h3 className="font-semibold text-gray-800 mb-2">Historique des mots-clés :</h3>
+              <ul className="list-disc pl-5">
+                {sortedKeywordsHistory.map((entry, index) => (
+                  <li key={index} style={{ color: entry.color }} className="mb-1">
+                    {entry.word}
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-              <div className="mb-4 text-sm text-gray-800">
-                <span className="font-medium">Légende : </span>
-                <span className="text-red-600">Rouge</span> : Mot peu similaire,{" "}
-                <span className="text-orange-600">Orange</span> : Mot très proche,{" "}
-                <span className="text-green-700">Vert</span> : Mot exact.
-              </div>
-
+            {frozen ? (
               <div className="mb-6">
-                <h3 className="font-semibold text-gray-800 mb-2">Historique des mots-clés :</h3>
-                <ul className="list-disc pl-5">
-                  {sortedKeywordsHistory.map((entry, index) => (
-                    <li key={index} style={{ color: entry.color }} className="mb-1">
-                      {entry.word}
-                    </li>
-                  ))}
-                </ul>
+                <p className="text-lg font-medium text-gray-800">{feedback}</p>
+                {correct && (
+                  <div className="mt-4">
+                    <Link
+                      href={targetLink}
+                      className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-800 inline-block transition-transform transform hover:scale-105 focus:outline-none focus:ring"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Accéder au chapitre du référentiel
+                    </Link>
+                  </div>
+                )}
               </div>
+            ) : null}
 
-              {frozen ? (
-                <div className="mb-6">
-                  <p className="text-lg font-medium text-gray-800">{feedback}</p>
-                  {correct && (
-                    <div className="mt-4">
-                      <Link
-                        href={targetLink}
-                        className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-800 inline-block transition-transform transform hover:scale-105 focus:outline-none focus:ring"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Accéder au chapitre du référentiel
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              ) : null}
+            {feedback && !frozen && (
+              <div className="mt-6 p-4 bg-yellow-100 rounded-lg text-center">
+                <p className="text-lg font-medium text-gray-800">{feedback}</p>
+                {correct && (
+                  <div className="mt-4">
+                    <Link
+                      href={targetLink}
+                      className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-800 inline-block transition-transform transform hover:scale-105 focus:outline-none focus:ring"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Accéder au chapitre du référentiel
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
 
-              {feedback && !frozen && (
-                <div className="mt-6 p-4 bg-yellow-100 rounded-lg text-center">
-                  <p className="text-lg font-medium text-gray-800">{feedback}</p>
-                  {correct && (
-                    <div className="mt-4">
-                      <Link
-                        href={targetLink}
-                        className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-800 inline-block transition-transform transform hover:scale-105 focus:outline-none focus:ring"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Accéder au chapitre du référentiel
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {isLibre && !frozen && (
-                <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 mb-6">
-                  <button
-                    onClick={handleHint}
-                    className="w-full py-3 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring"
-                  >
-                    Indice
-                  </button>
-                  <button
-                    onClick={handleShowAnswer}
-                    className="w-full py-3 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring"
-                  >
-                    Réponse
-                  </button>
-                  <button
-                    onClick={handleNewGame}
-                    className="w-full py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-transform transform hover:scale-105 focus:outline-none focus:ring"
-                  >
-                    Nouvelle partie
-                  </button>
-                </div>
-              )}
-            </main>
+            {isLibre && !frozen && (
+              <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4 mb-6">
+                <button
+                  onClick={handleHint}
+                  className="w-full py-3 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring"
+                >
+                  Indice
+                </button>
+                <button
+                  onClick={handleShowAnswer}
+                  className="w-full py-3 bg-red-700 text-white rounded-lg hover:bg-red-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring"
+                >
+                  Réponse
+                </button>
+                <button
+                  onClick={handleNewGame}
+                  className="w-full py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-transform transform hover:scale-105 focus:outline-none focus:ring"
+                >
+                  Nouvelle partie
+                </button>
+              </div>
+            )}
           </div>
         </main>
       </div>
-      {/* Footer commun */}
       <Footer />
     </Background>
   );

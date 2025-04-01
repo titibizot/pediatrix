@@ -6,22 +6,23 @@ const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
-    // On récupère le paramètre de requête "specialty" (optionnel)
+    // Récupérer le paramètre de requête "specialty" (optionnel)
     const { specialty } = req.query;
+    const specialtyStr = Array.isArray(specialty) ? specialty[0] : specialty;
 
-    // Construire la condition de filtre : si specialty est fourni, on filtre sur la relation specialties
-    const filter = specialty
-  ? { specialties: { some: { name: { equals: specialty.toString(), mode: 'insensitive' as const } } } }
-  : {};
+    // Construire le filtre si une spécialité est fournie
+    const filter = specialtyStr
+      ? { specialties: { some: { name: { equals: specialtyStr, mode: 'insensitive' } } } }
+      : {};
 
     // Récupérer toutes les maladies correspondant au filtre
     const diseases = await prisma.disease.findMany({
       where: filter,
+      // Aucun select n'est précisé, ainsi tous les champs (y compris startingKeyword) sont retournés
     });
 
     if (!diseases.length) {
-      res.status(404).json({ error: "Aucune maladie trouvée" });
-      return;
+      return res.status(404).json({ error: "Aucune maladie trouvée" });
     }
 
     // Sélectionner une maladie aléatoirement
