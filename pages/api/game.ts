@@ -9,18 +9,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ message: "Méthode non autorisée" });
   }
 
-  const { diseaseId, mode, success, timeSpent } = req.body;
+  const { diseaseId, mode, success, timeSpent, trainingYear } = req.body;
 
   try {
- const session = await prisma.gameSession.create({
-  data: {
-    disease: { connect: { id: diseaseId } },
-    mode,
-    success,
-    timeSpent,
-    trainingYear,
-  },
-});
+    const session = await prisma.gameSession.create({
+      data: {
+        // Utilisation de la relation pour connecter la maladie
+        disease: { connect: { id: diseaseId } },
+        mode,
+        success,
+        timeSpent,
+        trainingYear,  // Maintenant trainingYear est défini via req.body
+      },
+    });
     return res.status(200).json({ session });
   } catch (error: any) {
     console.error("Erreur dans /api/game:", error);
